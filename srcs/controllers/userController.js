@@ -1,6 +1,4 @@
-
 const { db } = require(`../database/database.js`);
-
 
 async function getAllUsers(request, reply) {
     try {
@@ -84,7 +82,7 @@ async function userLogin(request, reply) {
 
         const existingUser = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-                
+
                 console.log("🟢 Query executed");
 
                 if (err) {
@@ -101,7 +99,7 @@ async function userLogin(request, reply) {
         });
 
         console.log("Checking password...");
-        
+
         if (password === existingUser.password) {
             console.log("User logged in successfully:", username);
             console.log("Sending response...");
@@ -158,7 +156,7 @@ async function createUser(request, reply) {
 async function updateUser(request, reply) {
     const { id } = request.params;
     const { username, password } = request.body;
-    
+
     try {
         if (!username || !password) {
             return reply.status(400).send({ error: "Username and password are required" });
@@ -176,7 +174,7 @@ async function updateUser(request, reply) {
             return reply.status(400).send({ error: "Username already taken" });
         }
         const query = "UPDATE users SET username = ?, password = ? WHERE id = ?";
-        
+
         await new Promise((resolve, reject) => {
             db.run(query, [username, password, id], function (err) {
                 if (err) {
@@ -197,11 +195,11 @@ async function updateUser(request, reply) {
 async function deleteUser(request, reply) {
     const { id } = request.params;
     try {
-        await new Promise((resolve, reject) => { 
+        await new Promise((resolve, reject) => {
             db.run("DELETE FROM users WHERE id = ?", [id], function (err){
                 if (err) {
                     reject(err);
-                } 
+                }
                 else {
                     resolve(this);
                 }
@@ -217,11 +215,11 @@ async function deleteUser(request, reply) {
 
 
 module.exports = {
-    getAllUsers, 
-    getUserById, 
+    getAllUsers,
+    getUserById,
     getUserByUsername,
-    createUser, 
-    updateUser, 
+    createUser,
+    updateUser,
     deleteUser,
     userLogin
 };

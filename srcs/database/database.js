@@ -1,15 +1,25 @@
-import sqlite3Pkg from 'sqlite3';
+const sqlite3Pkg = require('sqlite3');
+const logger = require("../utils/logger");
+const dbConnexionException = require("../errors/dbConnexion");
 const sqlite3 = sqlite3Pkg.verbose();
 
-const db = new sqlite3.Database("./database/mydata.db", sqlite3.OPEN_READWRITE, connected);
-
 function connected(err) {
-    if (err) {
-        console.log(err.message);
-        return;
-    }
-    console.log;
+	try {
+
+		if (err) {
+			throw new dbConnexionException();
+		}
+		logger.info("Connected to database");
+	} catch (err) {
+		if (err.isCustomException) {
+			err.fallback();
+		} else {
+			logger.error(err);
+		}
+	}
 }
+
+const db = new sqlite3.Database(__dirname + '/mydata.db', sqlite3.OPEN_READWRITE, connected);
 
 const sql = `CREATE TABLE IF NOT EXISTS users(
     id INTEGER PRIMARY KEY,
@@ -26,4 +36,4 @@ db.run(sql, [], (err) => {
     console.log('CREATED TABLE')
 });
 
-export { db };
+module.exports = { db };

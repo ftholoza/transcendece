@@ -1,5 +1,4 @@
-
-export class User {
+class User {
     constructor(username, password){
         this.username = username;
         this.password = password;
@@ -14,3 +13,5 @@ export class User {
 const test = new User("test", "test");
 
 test.displayUser();
+
+module.exports = User;

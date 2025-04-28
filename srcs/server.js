@@ -1,6 +1,10 @@
-const { db } = require('./database/database.js');
 const fastify = require('fastify')({ logger: true, requestTimeout: 5000});
 const cors = require("@fastify/cors");
+const formbody = require('@fastify/formbody');
+
+const logger = require("./utils/logger");
+
+const userRoutes = require("./routes/userRoutes");
 
 fastify.register(cors, (instance) => (req, callback) => {
     const corsOptions = {
@@ -20,21 +24,21 @@ fastify.addContentTypeParser("application/json", { parseAs: "string" }, (req, bo
 });
 
 
-fastify.register(require("@fastify/formbody"));
+fastify.register(formbody);
 
 
-setInterval(() => {
-    console.log("⏳ Event loop is still alive...");
-}, 5000);
+// setInterval(() => {
+//     console.log("⏳ Event loop is still alive...");
+// }, 5000);
 
-fastify.register(require("./routes/userRoutes"), {prefix: "/api"});
+fastify.register(userRoutes, {prefix: "/api"});
 
 const start = async () => {
     try {
         await fastify.listen({ port: 3000});
-        fastify.log.info("Server is running on port 3000");
+		logger.info("Server is running on port 3000");
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         process.exit(1);
     }
 };
