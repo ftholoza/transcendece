@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcendence - Pong Arcade</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full Screen Layout */
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #000000; /* Dark background */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        /* Background (Subtle Animation for Retro Vibe) */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/black-linen.png');
+            background-size: 100px 100px;
+            opacity: 0.15;
+            animation: shimmer 8s infinite linear;
+            z-index: -1;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        /* Neon Title Text with Color Animation */
+        .neon-text {
+            font-size: 6em;
+            color: #39FF14; /* Neon green */
+            text-shadow: 0 0 20px #39FF14, 0 0 30px #39FF14, 0 0 40px #39FF14;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 5px;
+            animation: glow 1.5s infinite alternate, colorShift 4s infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 20px #39FF14, 0 0 30px #39FF14, 0 0 40px #39FF14; }
+            100% { text-shadow: 0 0 30px #00FF00, 0 0 50px #00FF00, 0 0 70px #00FF00; }
+        }
+
+        /* Color transition animation for text and buttons (Green to Red) */
+        @keyframes colorShift {
+            0% {
+                color: #39FF14; /* Neon Green */
+                text-shadow: 0 0 20px #39FF14, 0 0 30px #39FF14, 0 0 40px #39FF14;
+            }
+            100% {
+                color: #FF5733; /* Neon Red */
+                text-shadow: 0 0 20px #FF5733, 0 0 30px #FF5733, 0 0 40px #FF5733;
+            }
+        }
+
+        /* Menu Container */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 60%;
+            width: 100%;
+            gap: 20px;
+        }
+
+        /* Menu Buttons with Hover Effects */
+        .menu-btn {
+            background: #39FF14; /* Neon green */
+            color: black;
+            border: none;
+            padding: 20px 40px;
+            font-size: 2.2em;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.7), 0 0 30px rgba(57, 255, 20, 0.5);
+            border: 2px solid #39FF14;
+            outline: none;
+            animation: colorShiftButton 4s infinite alternate;
+        }
+
+        /* Color transition animation for buttons (Green to Red) */
+        @keyframes colorShiftButton {
+            0% {
+                background: #39FF14; /* Neon Green */
+                box-shadow: 0 0 20px rgba(57, 255, 20, 0.7), 0 0 30px rgba(57, 255, 20, 0.5);
+                border: 2px solid #39FF14;
+            }
+            100% {
+                background: #FF5733; /* Neon Red */
+                box-shadow: 0 0 20px rgba(255, 87, 51, 0.7), 0 0 30px rgba(255, 87, 51, 0.5);
+                border: 2px solid #FF5733;
+            }
+        }
+
+        .menu-btn:hover {
+            background: #FF5733; /* Lighter neon red */
+            box-shadow: 0 0 30px rgba(255, 87, 51, 0.8), 0 0 60px rgba(255, 87, 51, 0.5);
+            transform: scale(1.1);
+        }
+
+        .menu-btn:focus {
+            outline: none;
+            box-shadow: 0 0 40px rgba(255, 87, 51, 0.8), 0 0 80px rgba(255, 87, 51, 0.5);
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-around;
+            width: 60%;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .navbar a {
+            color: #39FF14; /* Neon green */
+            text-decoration: none;
+            font-size: 1.4em;
+            padding: 8px 16px;
+            text-transform: uppercase;
+        }
+
+        .navbar a:hover {
+            color: #FF5733; /* Neon red */
+            text-decoration: underline;
+        }
+
+        .navbar a.active {
+            color: #FF5733; /* Neon red */
+        }
+
+        /* Footer Styling */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            color: #39FF14; /* Neon green */
+            font-size: 14px;
+        }
+
+        /* Pong Game Canvas Styling */
+        #pongCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -2;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Background Pattern -->
+    <div class="background"></div>
+
+    <!-- Pong Game Canvas -->
+    <canvas id="pongCanvas"></canvas>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="#" class="active">Home</a>
+        <a href="#">Game</a>
+        <a href="#">Profile</a>
+        <a href="#">Settings</a>
+    </div>
+
+    <!-- Neon Title -->
+    <h1 class="neon-text">Transcendence</h1>
+
+    <!-- Menu Container with Buttons -->
+    <div class="menu-container">
+        <button class="menu-btn" id="start-game-btn">Start Game</button>
+        <button class="menu-btn" id="profile-btn">Profile</button>
+        <button class="menu-btn" id="settings-btn">Settings</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 Transcendence. All rights reserved.</p>
+    </div>
+
+    <script>
+        // Pong Game Simulation
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Resize the canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Paddle object
+        const paddleWidth = 10;
+        const paddleHeight = 100;
+        let paddleY = canvas.height / 2 - paddleHeight / 2;
+        let paddleSpeed = 0;
+        const paddle = {
+            x: 30,
+            y: paddleY,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#39FF14"
+        };
+
+        const opponentPaddle = {
+            x: canvas.width - 40,
+            y: canvas.height / 2 - paddleHeight / 2,
+            width: paddleWidth,
+            height: paddleHeight,
+            color: "#FF5733"
+        };
+
+        // Ball object
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speedX: 4,
+            speedY: 4,
+            color: "#39FF14"
+        };
+
+        // Draw paddle
+        function drawPaddle(x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+        }
+
+        // Draw ball
+        function drawBall(x, y, radius, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Move the paddles
+        function movePaddle() {
+            paddle.y += paddleSpeed;
+            if (paddle.y < 0) paddle.y = 0;
+            if (paddle.y + paddle.height > canvas.height) paddle.y = canvas.height - paddle.height;
+        }
+
+        // AI for opponent paddle
+        function moveOpponentPaddle() {
+            if (ball.y < opponentPaddle.y + opponentPaddle.height / 2) {
+                opponentPaddle.y -= 4;
+            } else {
+                opponentPaddle.y += 4;
+            }
+
+            // Keep opponent paddle within canvas bounds
+            if (opponentPaddle.y < 0) opponentPaddle.y = 0;
+            if (opponentPaddle.y + opponentPaddle.height > canvas.height) opponentPaddle.y = canvas.height - opponentPaddle.height;
+        }
+
+        // Ball movement
+        function moveBall() {
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // Ball collision with top and bottom
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.speedY = -ball.speedY;
+            }
+
+            // Ball collision with paddles
+            if (ball.x - ball.radius < paddle.x + paddle.width && ball.y > paddle.y && ball.y < paddle.y + paddle.height) {
+                ball.speedX = -ball.speedX;
+            }
+
+            if (ball.x + ball.radius > opponentPaddle.x && ball.y > opponentPaddle.y && ball.y < opponentPaddle.y + opponentPaddle.height) {
+                ball.speedX = -ball.speedX;
+            }
+
+            // Reset ball if out of bounds
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width / 2;
+                ball.y = canvas.height / 2;
+                ball.speedX = -ball.speedX;
+                ball.speedY = 4;
+            }
+        }
+
+        // Draw the game state
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw paddles and ball
+            drawPaddle(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
+            drawPaddle(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height, opponentPaddle.color);
+            drawBall(ball.x, ball.y, ball.radius, ball.color);
+
+            movePaddle();
+            moveOpponentPaddle();
+            moveBall();
+        }
+
+        // Control the player paddle
+        window.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowUp") paddleSpeed = -8;
+            if (event.key === "ArrowDown") paddleSpeed = 8;
+        });
+
+        window.addEventListener("keyup", () => {
+            paddleSpeed = 0;
+        });
+
+        // Main game loop
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game
+        gameLoop();
+    </script>
+</body>
+</html>
