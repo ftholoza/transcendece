@@ -2,3 +2,6 @@ node_modules
 package-lock.json
 
 .env
+
+/frontend/public/js
+/frontend/public/styles.css

@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"target": "ES6" ,
+		"module": "ES6",
+		"moduleResolution": "bundler",
+		"resolveJsonModule": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"outDir": "./frontend/public/js",
+		"rootDir": "./frontend/srcs"
+	},
+	"include": [
+		"frontend/srcs/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}
