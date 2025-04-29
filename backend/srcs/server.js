@@ -1,6 +1,7 @@
 const fastify = require('fastify')({ logger: true, requestTimeout: 5000});
 const cors = require("@fastify/cors");
 const formbody = require('@fastify/formbody');
+const websocket = require('@fastify/websocket');
 const fastifyStatic = require("@fastify/static");
 
 const logger = require("./utils/logger");
@@ -26,6 +27,15 @@ fastify.addContentTypeParser("application/json", { parseAs: "string" }, (req, bo
 });
 
 fastify.register(formbody);
+fastify.register(websocket);
+
+fastify.register( async function (fastify) {
+	fastify.get("/chat", { websocket: true} , (socket, req) => {
+		socket.on("message", (message) => {
+			socket.send("hi from server");
+		})
+	})
+});
 
 // setInterval(() => {
 //     console.log("⏳ Event loop is still alive...");
