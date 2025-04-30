@@ -8,7 +8,7 @@
     "build:ts": "tsc -p tsconfig.json",
     "build:css": "postcss frontend/srcs/styles.css -o frontend/public/styles.css",
     "build": "npm run build:ts && npm run build:css",
-    "start": "tsc && node backend/srcs/server.js"
+    "start": "node backend/srcs/server.js"
   },
   "keywords": [],
   "author": "",

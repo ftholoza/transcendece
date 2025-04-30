@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  transcendence:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - db-data:/usr/src/app/database
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+volumes:
+  db-data:

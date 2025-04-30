@@ -1,6 +1,6 @@
 const sqlite3Pkg = require('sqlite3');
-const logger = require("../utils/logger");
-const dbConnexionException = require("../errors/dbConnexion");
+const logger = require("../srcs/utils/logger");
+const dbConnexionException = require("../srcs/errors/dbConnexion");
 const sqlite3 = sqlite3Pkg.verbose();
 
 function connected(err) {
@@ -19,7 +19,7 @@ function connected(err) {
 	}
 }
 
-const db = new sqlite3.Database(__dirname + '/mydata.db', sqlite3.OPEN_READWRITE, connected);
+const db = new sqlite3.Database('/usr/src/app/database/mydata.db', sqlite3.OPEN_READWRITE, connected);
 
 const sql = `CREATE TABLE IF NOT EXISTS users(
     id INTEGER PRIMARY KEY,
