@@ -50,7 +50,7 @@ fastify.get("/", async (request, reply) => {
 
 const start = async () => {
     try {
-        await fastify.listen({ port: 3000});
+        await fastify.listen({ port: 3000, host: "0.0.0.0"});
 		logger.info("Server is running on port 3000");
     } catch (error) {
         logger.error(error);
