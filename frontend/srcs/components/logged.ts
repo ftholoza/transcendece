@@ -1,5 +1,8 @@
+import { start_pong_game } from "./pong.js";
+
 export function generateLoggedPage(): void {
 	// Création du body
+	console.log("generateLoggedPage called");
 	const body = document.body;
 	body.classList.add('bg-black', 'text-white', 'font-mono', 'flex', 'justify-center', 'items-center', 'h-screen', 'relative');
 
@@ -37,6 +40,14 @@ export function generateLoggedPage(): void {
 		button.classList.add('bg-green-500', 'text-black', 'py-4', 'px-10', 'text-2xl', 'rounded-lg', 'transform', 'transition', 'duration-300', 'ease-in-out', 'hover:scale-110', 'focus:outline-none', 'focus:ring-4', 'focus:ring-green-300');
 		button.textContent = text;
 		gameMenu.appendChild(button);
+
+		if (text == 'Start Game') {
+			console.log('Button created');
+			button.addEventListener('click', () => {
+				console.log('Start Game button clicked');
+				start_pong_game();
+			});
+		}
 	});
 
 	// Footer
@@ -57,6 +68,8 @@ export function generateLoggedPage(): void {
 
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
+	canvas.classList.add('pointer-events-none');
+
 
 	const paddleWidth = 10;
 	const paddleHeight = 100;
