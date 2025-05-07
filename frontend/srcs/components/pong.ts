@@ -1,5 +1,5 @@
 import { generateLoggedPage } from "./logged.js";
-
+import { endGameScreen } from "./endGame.js";
 
 const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 100;
@@ -17,17 +17,54 @@ let ballRadius = 10;
 let ballSpeedX = 4;
 let ballSpeedY = 3;
 
+type Particle = {
+  x: number;
+  y: number;
+  radius: number;
+  dx: number;
+  dy: number;
+  alpha: number;
+};
+
+const particles: Particle[] = [];
+
 const keysPressed: Record<string, boolean> = {};
 
-export function start_pong_game() {
+export function start_pong_game(maxPoint: number) {
+
+  document.body.innerHTML = '';
+  const container = document.createElement('div');
+  container.style.position = 'relative';
+  container.style.width = '800px';
+  container.style.height = '600px';
+  container.style.margin = '0 auto'; // Center horizontally
+  container.style.display = 'block';
+  document.body.appendChild(container);
+
   const canvas = document.createElement('canvas');
   canvas.width = 800;
   canvas.height = 600;
-  document.body.innerHTML = '';
-  document.body.appendChild(canvas);
+  canvas.style.border = '10px solid white';
+  canvas.style.backgroundColor = 'black';
+  canvas.style.display = 'block';
+  container.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error("Canvas not supported");
+
+  const overlayCanvas = document.createElement('canvas');
+  overlayCanvas.width = 800;
+  overlayCanvas.height = 600;
+  overlayCanvas.style.position = 'absolute';
+  overlayCanvas.style.top = '0';
+  overlayCanvas.style.left = '0';
+  overlayCanvas.style.pointerEvents = 'none'; // allow clicks to go through
+  container.appendChild(overlayCanvas); 
+  
+  const overlayCtx = overlayCanvas.getContext('2d');
+  if (!overlayCtx) throw new Error("Overlay canvas not supported");
+
+
 
   // --- Keyboard Input ---
   window.addEventListener('keydown', (e) => {
@@ -58,6 +95,57 @@ export function start_pong_game() {
   });
 
 
+  function explosionEffect(x: number, y: number, ctx: CanvasRenderingContext2D) {
+    const particles: {
+      x: number;
+      y: number;
+      dx: number;
+      dy: number;
+      alpha: number;
+      radius: number;
+    }[] = [];
+  
+    for (let i = 0; i < 20; i++) {
+      particles.push({
+        x,
+        y,
+        dx: (Math.random() - 0.5) * 4,
+        dy: (Math.random() - 0.5) * 4,
+        alpha: 1,
+        radius: 3 + Math.random() * 2,
+      });
+    }
+  
+    function animate() {
+      ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+  
+      particles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        p.alpha -= 0.03;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 200, 0, ${p.alpha})`;
+        ctx.fill();
+      });
+  
+      // Remove particles that are invisible
+      const activeParticles = particles.filter(p => p.alpha > 0);
+      if (activeParticles.length > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      }
+    }
+  
+    animate();
+  }
+
+  function resetPaddles()
+  {
+    leftPaddleY = 250;
+    rightPaddleY = 250;
+  }
   
   function drawPaddles(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = 'white';
@@ -104,7 +192,7 @@ export function start_pong_game() {
     ctx.fillText(`${rightScore}`, 3 * canvas.width / 4, 50);
   }
 
-  function render(ctx: CanvasRenderingContext2D) {
+  function render(ctx: CanvasRenderingContext2D, overlayCtx: CanvasRenderingContext2D) {
     // Clear screen
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -120,6 +208,7 @@ export function start_pong_game() {
       ballY >= leftPaddleY &&
       ballY <= leftPaddleY + PADDLE_HEIGHT
     ) {
+      ballSpeedX *= 1.1;
       ballSpeedX *= -1;
       const hitPoint = ballY - (leftPaddleY + PADDLE_HEIGHT / 2);
       const normalized = hitPoint / (PADDLE_HEIGHT / 2);
@@ -133,6 +222,7 @@ export function start_pong_game() {
       ballY >= rightPaddleY &&
       ballY <= rightPaddleY + PADDLE_HEIGHT
     ) {
+      ballSpeedY *= 1.1;
       ballSpeedX *= -1;
       const hitPoint = ballY - (rightPaddleY + PADDLE_HEIGHT / 2);
       const normalized = hitPoint / (PADDLE_HEIGHT / 2);
@@ -141,12 +231,24 @@ export function start_pong_game() {
     }
 
     if (ballX - ballRadius < 0) {
+      explosionEffect(ballX, ballY, overlayCtx);
       rightScore++;
       resetBall();
+      ballSpeedX = 4;
     }
     if (ballX + ballRadius > canvas.width) {
+      explosionEffect(ballX, ballY, overlayCtx);
       leftScore++;
       resetBall();
+      ballSpeedX = 4;
+    }
+    if (leftScore == maxPoint || rightScore == maxPoint)
+    {
+      gameRunning = false;
+      if (leftScore == maxPoint)
+        endGameScreen("left");
+      else
+        endGameScreen("right"); 
     }
 
     // Bounce off top and bottom
@@ -158,16 +260,15 @@ export function start_pong_game() {
     drawBall(ctx);
     drawScore(ctx);
     if (gameRunning == true)
-      requestAnimationFrame(() => render(ctx));
+      requestAnimationFrame(() => render(ctx, overlayCtx));
     else
     {
       resetBall();
-      drawPaddles(ctx);
-      drawBall(ctx);
+      resetPaddles();
       leftScore = 0;
       rightScore = 0;
     }
   }
 
-  render(ctx);
+  render(ctx, overlayCtx);
 }

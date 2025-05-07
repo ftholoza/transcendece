@@ -1,4 +1,5 @@
 import { start_pong_game } from "./pong.js";
+import { showStartMenu } from "./startMenu.js";
 
 export function generateLoggedPage(): void {
 	// Création du body
@@ -45,7 +46,7 @@ export function generateLoggedPage(): void {
 			console.log('Button created');
 			button.addEventListener('click', () => {
 				console.log('Start Game button clicked');
-				start_pong_game();
+				showStartMenu();
 			});
 		}
 	});
