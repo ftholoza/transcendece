@@ -1,4 +1,5 @@
 import { start_pong_game } from "./pong.js";
+import { generateLoggedPage } from "./logged.js";
 
 export function showStartMenu(): void {
     // Clear and style body
@@ -42,6 +43,23 @@ export function showStartMenu(): void {
     input.style.textAlign = 'center';
     container.appendChild(input);
   
+
+    const exitButton = document.createElement('button');
+    exitButton.textContent = 'Exit';
+    exitButton.style.position = 'absolute';
+    exitButton.style.top = '20px';
+    exitButton.style.right = '20px';
+    exitButton.style.padding = '10px 20px';
+    exitButton.style.fontSize = '16px';
+    exitButton.style.zIndex = '1';
+    document.body.appendChild(exitButton);
+
+  
+    exitButton.addEventListener('click', () => {
+    document.body.innerHTML = '';
+    generateLoggedPage();
+    });
+
     // Start button
     const startBtn = document.createElement('button');
     startBtn.textContent = 'Start Game';

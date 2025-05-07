@@ -1,5 +1,6 @@
 import { start_pong_game } from "./pong.js";
 import { showStartMenu } from "./startMenu.js";
+import { initProfilePage } from "./profilePage.js";
 
 export function generateLoggedPage(): void {
 	// Création du body
@@ -26,29 +27,72 @@ export function generateLoggedPage(): void {
 	});
 
 	// Titre principal
+	const container = document.createElement('div');
+	container.style.display = 'flex';
+	container.style.flexDirection = 'column';
+	container.style.alignItems = 'center';
+	container.style.justifyContent = 'center';
+	container.style.height = '100vh';
+	container.style.textAlign = 'center';
+	document.body.appendChild(container);
+  
+	// Title
 	const title = document.createElement('h1');
-	title.classList.add('text-6xl', 'text-green-500', 'text-shadow-glow', 'mb-12', 'uppercase', 'font-extrabold', 'animate-[glow_1.5s_infinite_alternate]');
-	title.textContent = 'Transcendence';
-	body.appendChild(title);
-
-	// Menu du jeu
+	title.textContent = 'TRANSCENDENCE';
+	title.style.fontFamily = 'monospace';
+	title.style.fontSize = '64px';
+	title.style.color = '#00ff00';
+	title.style.textShadow = '0 0 10px #00ff00'; // optional glow
+	container.appendChild(title);
+  
+	// Game menu buttons
 	const gameMenu = document.createElement('div');
-	gameMenu.classList.add('flex', 'flex-col', 'items-center', 'gap-6');
-	body.appendChild(gameMenu);
-
+	gameMenu.style.display = 'flex';
+	gameMenu.style.flexDirection = 'column';
+	gameMenu.style.marginTop = '30px';
+	gameMenu.style.gap = '15px';
+	container.appendChild(gameMenu);
+  
 	['Start Game', 'Profile', 'Settings'].forEach((text) => {
-		const button = document.createElement('button');
-		button.classList.add('bg-green-500', 'text-black', 'py-4', 'px-10', 'text-2xl', 'rounded-lg', 'transform', 'transition', 'duration-300', 'ease-in-out', 'hover:scale-110', 'focus:outline-none', 'focus:ring-4', 'focus:ring-green-300');
-		button.textContent = text;
-		gameMenu.appendChild(button);
-
-		if (text == 'Start Game') {
-			console.log('Button created');
-			button.addEventListener('click', () => {
-				console.log('Start Game button clicked');
-				showStartMenu();
-			});
-		}
+	  const button = document.createElement('button');
+	  button.classList.add(
+		'bg-green-500',
+		'text-black',
+		'py-4',
+		'px-10',
+		'text-2xl',
+		'rounded-lg',
+		'transform',
+		'transition',
+		'duration-300',
+		'ease-in-out',
+		'hover:scale-110',
+		'focus:outline-none',
+		'focus:ring-4',
+		'focus:ring-green-300'
+	  );
+	  button.textContent = text;
+	  gameMenu.appendChild(button);
+  
+	  // Optional: bind events
+	  if (text === 'Start Game') {
+		button.addEventListener('click', () => {
+		  console.log('Start Game clicked');
+		  showStartMenu(); // replace with your function
+		});
+	  }
+	  if (text === 'Profile') {
+		button.addEventListener('click', () => {
+		  initProfilePage();
+		  // Add action
+		});
+	  }
+	  if (text === 'Settings') {
+		button.addEventListener('click', () => {
+		  console.log('Settings clicked');
+		  // Add action
+		});
+	  }
 	});
 
 	// Footer
@@ -57,108 +101,4 @@ export function generateLoggedPage(): void {
 	footer.textContent = '© 2025 Transcendence. All rights reserved.';
 	body.appendChild(footer);
 
-	// Canvas pour le jeu Pong
-	const canvas = document.createElement('canvas');
-	canvas.id = 'pongCanvas';
-	canvas.classList.add('absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'z-[-2]');
-	body.appendChild(canvas);
-
-	// Initialisation du jeu Pong
-	const ctx = canvas.getContext('2d');
-	if (!ctx) return;
-
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	canvas.classList.add('pointer-events-none');
-
-
-	const paddleWidth = 10;
-	const paddleHeight = 100;
-	let paddleY = canvas.height / 2 - paddleHeight / 2;
-	let paddleSpeed = 0;
-	const paddle = { x: 30, y: paddleY, width: paddleWidth, height: paddleHeight, color: '#39FF14' };
-	const opponentPaddle = { x: canvas.width - 40, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, color: '#FF5733' };
-	const ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 10, speedX: 4, speedY: 4, color: '#39FF14' };
-
-	function drawPaddle(x: number, y: number, width: number, height: number, color: string): void {
-		if (!ctx) return;
-		ctx.fillStyle = color;
-		ctx.fillRect(x, y, width, height);
-	}
-
-	function drawBall(x: number, y: number, radius: number, color: string): void {
-		if (!ctx) return;
-		ctx.fillStyle = color;
-		ctx.beginPath();
-		ctx.arc(x, y, radius, 0, Math.PI * 2);
-		ctx.fill();
-	}
-
-	function movePaddle(): void {
-		paddle.y += paddleSpeed;
-		if (paddle.y < 0) paddle.y = 0;
-		if (paddle.y + paddle.height > canvas.height) paddle.y = canvas.height - paddle.height;
-	}
-
-	function moveOpponentPaddle(): void {
-		if (ball.y < opponentPaddle.y + opponentPaddle.height / 2) {
-			opponentPaddle.y -= 4;
-		} else {
-			opponentPaddle.y += 4;
-		}
-
-		if (opponentPaddle.y < 0) opponentPaddle.y = 0;
-		if (opponentPaddle.y + opponentPaddle.height > canvas.height) opponentPaddle.y = canvas.height - opponentPaddle.height;
-	}
-
-	function moveBall(): void {
-		ball.x += ball.speedX;
-		ball.y += ball.speedY;
-
-		if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-			ball.speedY = -ball.speedY;
-		}
-
-		if (ball.x - ball.radius < paddle.x + paddle.width && ball.y > paddle.y && ball.y < paddle.y + paddle.height) {
-			ball.speedX = -ball.speedX;
-		}
-
-		if (ball.x + ball.radius > opponentPaddle.x && ball.y > opponentPaddle.y && ball.y < opponentPaddle.y + opponentPaddle.height) {
-			ball.speedX = -ball.speedX;
-		}
-
-		if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
-			ball.x = canvas.width / 2;
-			ball.y = canvas.height / 2;
-			ball.speedX = -ball.speedX;
-			ball.speedY = 4;
-		}
-	}
-
-	function draw(): void {
-		if (!ctx) return;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		drawPaddle(paddle.x, paddle.y, paddle.width, paddle.height, paddle.color);
-		drawPaddle(opponentPaddle.x, opponentPaddle.y, opponentPaddle.width, opponentPaddle.height, opponentPaddle.color);
-		drawBall(ball.x, ball.y, ball.radius, ball.color);
-		movePaddle();
-		moveOpponentPaddle();
-		moveBall();
-	}
-
-	window.addEventListener('keydown', (event) => {
-		if (event.key === 'ArrowUp') paddleSpeed = -8;
-		if (event.key === 'ArrowDown') paddleSpeed = 8;
-	});
-
-	window.addEventListener('keyup', () => {
-		paddleSpeed = 0;
-	});
-
-	function gameLoop(): void {
-		draw();
-		requestAnimationFrame(gameLoop);
-	}
-
-	gameLoop();
 }
