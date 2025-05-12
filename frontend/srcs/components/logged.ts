@@ -1,28 +1,34 @@
 import { start_pong_game } from "./pong.js";
 import { showStartMenu } from "./startMenu.js";
-import { initProfilePage } from "./profilePage.js";
+import { createProfilePage } from "./profilePage.js";
+import { clearPage } from "../utils/clear.js";
+import { generateLoginPage } from "./loggin.js";
 
 export function generateLoggedPage(): void {
-	// Création du body
 	console.log("generateLoggedPage called");
 	const body = document.body;
 	body.classList.add('bg-black', 'text-white', 'font-mono', 'flex', 'justify-center', 'items-center', 'h-screen', 'relative');
 
-	// Ajout d'un fond d'écran avec animation
 	const background = document.createElement('div');
 	background.classList.add('absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'bg-[url("https://www.transparenttextures.com/patterns/black-linen.png")]', 'bg-cover', 'opacity-15', 'animate-[shimmer_8s_infinite_linear]', 'z-[-1]');
 	body.appendChild(background);
 
-	// Création de la navbar
 	const navbar = document.createElement('div');
 	navbar.classList.add('absolute', 'top-10', 'left-1/2', 'transform', '-translate-x-1/2', 'flex', 'space-x-8', 'bg-black', 'bg-opacity-60', 'p-4', 'rounded-lg', 'shadow-lg');
 	body.appendChild(navbar);
 
-	// Ajout des éléments de la navbar
-	['Home', 'Game', 'Profile', 'Settings'].forEach((text) => {
+	['Home', 'Game', 'Profile', 'Settings', 'Disconnect'].forEach((text) => {
 		const link = document.createElement('a');
 		link.classList.add('text-lg', 'text-green-500', 'hover:text-red-500');
 		link.textContent = text;
+			link.addEventListener('click', () => {
+		switch (text) {
+			case 'Disconnect':
+				clearPage();
+				generateLoginPage();
+				break;
+		}
+	});
 		navbar.appendChild(link);
 	});
 
@@ -74,17 +80,15 @@ export function generateLoggedPage(): void {
 	  button.textContent = text;
 	  gameMenu.appendChild(button);
   
-	  // Optional: bind events
 	  if (text === 'Start Game') {
 		button.addEventListener('click', () => {
 		  console.log('Start Game clicked');
-		  showStartMenu(); // replace with your function
+		  showStartMenu();
 		});
 	  }
 	  if (text === 'Profile') {
 		button.addEventListener('click', () => {
-		  initProfilePage();
-		  // Add action
+		  createProfilePage();
 		});
 	  }
 	  if (text === 'Settings') {

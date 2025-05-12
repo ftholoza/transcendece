@@ -1,8 +1,11 @@
 import {api} from "../services/api.js";
+import { clearPage } from "../utils/clear.js";
+import { generateLoginPage } from "./loggin.js";
 
 export function createRegisterPage() {
+	console.log("---create register called---")
 	// Créer le body
-	const body = document.createElement('body');
+	const body = document.body;
 	body.classList.add('font-[Press_Start_2P]', 'bg-black', 'text-white', 'h-screen', 'flex', 'justify-center', 'items-center', 'overflow-hidden');
 
 	// Créer le container
@@ -86,4 +89,11 @@ export function createRegisterPage() {
 		console.log(`Registering user: ${username}, Email: ${email}, Password: ${password}`);
 		api.register(username, email, password);
 	});
+
+	footerLink.addEventListener('click', (e) => {
+  	e.preventDefault();
+	clearPage();
+  	generateLoginPage();
+});
+
 }
