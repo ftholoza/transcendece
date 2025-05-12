@@ -1,6 +1,6 @@
 import { start_pong_game } from "./pong.js";
 import { showStartMenu } from "./startMenu.js";
-import { initProfilePage } from "./profilePage.js";
+import { createProfilePage } from "./profilePage.js";
 import { clearPage } from "../utils/clear.js";
 import { generateLoginPage } from "./loggin.js";
 
@@ -88,8 +88,7 @@ export function generateLoggedPage(): void {
 	  }
 	  if (text === 'Profile') {
 		button.addEventListener('click', () => {
-		  initProfilePage();
-		  // Add action
+		  createProfilePage();
 		});
 	  }
 	  if (text === 'Settings') {
