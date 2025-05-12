@@ -1,4 +1,5 @@
 const { db } = require(`../../database/database.js`);
+const UserLoginException = require('../errors/userLogin.js')
 
 async function getAllUsers(request, reply) {
     try {
@@ -90,7 +91,7 @@ async function userLogin(request, reply) {
                     reject(err);
                 } else if (!row) {
                     console.log("🚫 User not found:", username);
-                    reject(new Error("User not found"));
+                    reject(new UserLoginException(reply));
                 } else {
                     console.log("✅ User found:", row);
                     resolve(row);
@@ -110,6 +111,10 @@ async function userLogin(request, reply) {
             return reply.status(401).send({ message: "Wrong Password" });
         }
     } catch (error) {
+        if (error.isCustomException) {
+            error.fallback();
+            return;
+        }
         console.error("Error in userLogin:", error);
         return reply.status(500).send({ error: "Internal Server Error" });
     }

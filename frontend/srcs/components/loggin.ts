@@ -131,7 +131,12 @@ export const generateLoginPage = () : void => {
 	  createRegisterPage();
 	});
 
+  const errorField = document.createElement('p');
+	errorField.id = 'error-field';
+	errorField.textContent = '';
+  
 	// Ajouter le formulaire et le lien au conteneur
+	loginContainer.appendChild(errorField);
 	loginContainer.appendChild(form);
 	loginContainer.appendChild(registerButton);
 

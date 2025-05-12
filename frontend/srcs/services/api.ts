@@ -19,7 +19,11 @@ async function login(username: string, password: string) {
 			clearPage();
 			generateLoggedPage();
 		} else {
-			alert(result.error || 'Login failed');
+			const errorField = document.getElementById('error-field');
+			if (!errorField) return;
+
+			errorField.textContent = 'Invalid Login or Password';
+			errorField.classList.add('text-red-500');
 		}
 	} catch (error) {
 		console.error('Error:', error);
