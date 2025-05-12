@@ -1,4 +1,6 @@
 import {api} from "../services/api.js";
+import { clearPage } from "../utils/clear.js";
+import { createRegisterPage } from "./register.js";
 
 export const generateLoginPage = () : void => {
 	// Créer le conteneur de la page
@@ -108,23 +110,30 @@ export const generateLoginPage = () : void => {
 	form.appendChild(submitButton);
 
 	// Créer le lien pour l'inscription
-	const registerLink = document.createElement('a');
-	registerLink.href = 'register.html';
-	registerLink.textContent = "Don't have an account? Register here";
-	registerLink.classList.add(
-		'text-green-500',
-		'text-sm',
-		'mt-6',
-		'inline-block',
-		'hover:underline',
-		'transition-all',
-		'duration-300',
-		'hover:text-green-400'
+	const registerButton = document.createElement('button');
+	registerButton.textContent = "Don't have an account? Register here";
+	registerButton.classList.add(
+	  'text-green-500',
+	  'text-sm',
+	  'mt-6',
+	  'hover:underline',
+	  'transition-all',
+	  'duration-300',
+	  'hover:text-green-400',
+	  'cursor-pointer',
+	  'bg-transparent',
+	  'border-none'
 	);
+
+	registerButton.addEventListener('click', (e) => {
+	  e.preventDefault();
+	  clearPage();
+	  createRegisterPage();
+	});
 
 	// Ajouter le formulaire et le lien au conteneur
 	loginContainer.appendChild(form);
-	loginContainer.appendChild(registerLink);
+	loginContainer.appendChild(registerButton);
 
 	// Ajouter le conteneur au body
 	body.appendChild(loginContainer);
@@ -137,4 +146,5 @@ export const generateLoginPage = () : void => {
 
 		api.login(username.value, password.value);
 	});
+
 }

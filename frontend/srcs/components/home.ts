@@ -60,31 +60,6 @@ export function createHomePage(): void {
 	container.appendChild(buttonContainer);
 	body.appendChild(container);
 
-	// Pong Ball
-	const ball = document.createElement('div');
-	ball.classList.add('w-5', 'h-5', 'bg-lime-500', 'absolute', 'top-1/2', 'left-1/2', 'rounded-full', 'animate-[moveBall_2s_infinite_alternate_ease-in-out]');
-	body.appendChild(ball);
-
-	// Paddle Left
-	const paddleLeft = document.createElement('div');
-	paddleLeft.classList.add('w-2', 'h-20', 'bg-cyan-500', 'absolute', 'left-2', 'top-1/2', 'transform', 'translate-y-[-50%]');
-	body.appendChild(paddleLeft);
-
-	// Paddle Right
-	const paddleRight = document.createElement('div');
-	paddleRight.classList.add('w-2', 'h-20', 'bg-cyan-500', 'absolute', 'right-2', 'top-1/2', 'transform', 'translate-y-[-50%]');
-	body.appendChild(paddleRight);
-
-	// Add animation to move the ball
-	const styleSheet = document.createElement('style');
-	styleSheet.innerHTML = `
-        @keyframes moveBall {
-            from { top: 10%; left: 10%; }
-            to { top: 90%; left: 90%; }
-        }
-    `;
-	body.appendChild(styleSheet);
-
 	// Event listeners for buttons
 	loginBtn.addEventListener('click', () => {
 		clearPage();
