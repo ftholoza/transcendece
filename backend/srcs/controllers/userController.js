@@ -1,6 +1,110 @@
 const { db } = require(`../../database/database.js`);
 const UserLoginException = require('../errors/userLogin.js')
 
+
+async function getUserAvatar(request, reply) {
+  const username = request.params.username;
+
+  if (!username) {
+    return reply.status(400).send({ error: "Username is required" });
+  }
+
+  try {
+    const user = await new Promise((resolve, reject) => {
+      db.get("SELECT avatar FROM users WHERE username = ?", [username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    if (!user || !user.avatar) {
+      return reply.status(404).send({ error: "Avatar not found" });
+    }
+
+    reply
+      .header('Content-Type', 'image/png')
+      .send(user.avatar);
+  } catch (err) {
+    console.error("Error retrieving avatar:", err);
+    reply.status(500).send({ error: "Unexpected server error" });
+  }
+}
+
+
+async function UpdateAvatar(request, reply) {
+  const username = request.params.username;
+
+  if (!username) {
+    return reply.status(400).send({ error: "Username is required" });
+  }
+
+  console.log("Update Avatar called for", username);
+
+  try {
+    const parts = request.parts();
+    let avatarBuffer = null;
+
+    for await (const part of parts) {
+      if (part.type === 'file' && part.fieldname === 'avatar') {
+        avatarBuffer = await part.toBuffer();
+      }
+    }
+
+    if (!avatarBuffer) {
+      return reply.status(400).send({ error: "No avatar file uploaded" });
+    }
+
+    const existingUser = await new Promise((resolve, reject) => {
+      db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+
+    if (!existingUser) {
+      return reply.status(404).send({ error: "Username not found" });
+    }
+
+    await new Promise((resolve, reject) => {
+      db.run(
+        "UPDATE users SET avatar = ? WHERE username = ?",
+        [avatarBuffer, username],
+        function (err) {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+
+    reply.status(200).send({ message: `Avatar updated for ${username}.` });
+
+  } catch (err) {
+    console.error("Error updating user", err);
+    reply.status(500).send({ error: "Unexpected server error" });
+  }
+}
+
+
+async function deleteUser(request, reply) {
+    const { id } = request.params;
+    try {
+        await new Promise((resolve, reject) => {
+            db.run("DELETE FROM users WHERE id = ?", [id], function (err){
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(this);
+                }
+        });
+    });
+    reply.status(201).send({ message: "User deleted successfully"});
+    }catch (err) {
+        console.error("Error deleting user", err);
+        reply.status(500).send({ error: "Unexpected server error" });
+    }
+}
+
 async function getAllUsers(request, reply) {
     try {
         const rows = await new Promise((resolve, reject) => {
@@ -218,8 +322,9 @@ async function deleteUser(request, reply) {
 }
 
 
-
 module.exports = {
+    getUserAvatar,
+    UpdateAvatar,
     getAllUsers,
     getUserById,
     getUserByUsername,

@@ -5,6 +5,9 @@ FROM node:22.14
 WORKDIR /usr/src/app
 
 # Copy dependency files first
+RUN apt update
+RUN apt install sqlite3
+
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY postcss.config.js ./
@@ -12,6 +15,7 @@ COPY tailwind.config.js ./
 
 # Install all dependencies
 RUN npm install
+RUN npm install @fastify/multipart
 
 # Now copy the rest of the application cod
 RUN mkdir /usr/src/app/database

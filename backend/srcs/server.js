@@ -2,7 +2,9 @@ const fastify = require('fastify')({ logger: true, requestTimeout: 5000});
 const cors = require("@fastify/cors");
 const formbody = require('@fastify/formbody');
 const fastifyStatic = require("@fastify/static");
+const fastifyMultipart = require('@fastify/multipart');
 
+fastify.register(fastifyMultipart);
 const logger = require("./utils/logger");
 
 const userRoutes = require("./routes/userRoutes");

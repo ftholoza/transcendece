@@ -148,6 +148,7 @@ export const generateLoginPage = () : void => {
 		event.preventDefault();
 		const username = document.getElementById('username') as HTMLInputElement;
 		const password = document.getElementById('password') as HTMLInputElement;
+		localStorage.setItem('username', username.value);
 
 		api.login(username.value, password.value);
 	});

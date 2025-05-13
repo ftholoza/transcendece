@@ -3,6 +3,42 @@ import {generateLoginPage} from "../components/loggin.js";
 import {setUser} from "../states/state.js";
 import {clearPage} from "../utils/clear.js";
 
+
+async function getUserByUsername(username: string) {
+	console.log("getUserByUsername called");
+		try {
+			const name = localStorage.getItem('username');
+			if (!name)
+				return;
+			const response = await fetch(`http://localhost:3000/api/users/username/${encodeURIComponent(name)}`, {
+				method: 'GET',
+				headers: { 'Content-Type': 'application/json' },
+			});
+
+		const result = await response.json();
+
+		if (response.ok) {
+			localStorage.setItem("username", username);
+			localStorage.setItem("email", result.email);
+			const avatarUrl = `/api/users/avatar/${encodeURIComponent(username)}`;
+			localStorage.setItem("avatar", avatarUrl);
+			const email = localStorage.getItem("email");
+			console.log(email);
+			
+		} else {
+			const errorField = document.getElementById('error-field');
+			if (!errorField) return;
+
+			errorField.textContent = 'Invalid Username';
+			errorField.classList.add('text-red-500');
+		}
+	} catch (error) {
+		console.error('Error:', error);
+		alert('An error occurred. Please try again.');
+	}
+	
+}
+
 async function login(username: string, password: string) {
 	try {
 		const response = await fetch('http://localhost:3000/api/users/login', {
@@ -58,5 +94,6 @@ async function register(username: string, email: string, password: string) {
 
 export const api = {
 	login,
-	register
+	register,
+	getUserByUsername
 };
