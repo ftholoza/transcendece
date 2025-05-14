@@ -35,18 +35,23 @@ export function start_pong_game(maxPoint: number) {
   document.body.innerHTML = '';
   const container = document.createElement('div');
   container.style.position = 'relative';
-  container.style.width = '800px';
-  container.style.height = '600px';
+  container.style.width = '820px';
+  container.style.height = '620px';
   container.style.margin = '0 auto'; // Center horizontally
   container.style.display = 'block';
+  container.style.zIndex = '0';
+  container.style.border = '10px solid white';
+
   document.body.appendChild(container);
 
   const canvas = document.createElement('canvas');
   canvas.width = 800;
   canvas.height = 600;
-  canvas.style.border = '10px solid white';
+  canvas.style.border = 'none';
+  canvas.style.position = 'absolute';
   canvas.style.backgroundColor = 'black';
   canvas.style.display = 'block';
+  canvas.style.zIndex = '1';
   container.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
@@ -58,7 +63,10 @@ export function start_pong_game(maxPoint: number) {
   overlayCanvas.style.position = 'absolute';
   overlayCanvas.style.top = '0';
   overlayCanvas.style.left = '0';
-  overlayCanvas.style.pointerEvents = 'none'; // allow clicks to go through
+  overlayCanvas.style.pointerEvents = 'none';
+  overlayCanvas.style.zIndex = '2';
+  overlayCanvas.style.backgroundColor = 'transparent';
+
   container.appendChild(overlayCanvas); 
   
   const overlayCtx = overlayCanvas.getContext('2d');
@@ -141,6 +149,8 @@ export function start_pong_game(maxPoint: number) {
     animate();
   }
 
+
+
   function resetPaddles()
   {
     leftPaddleY = 250;
@@ -161,6 +171,8 @@ export function start_pong_game(maxPoint: number) {
     ctx.closePath();
   }
 
+
+
   function updatePaddles() {
     // Left paddle (W/S)
     if (keysPressed['w'] && leftPaddleY > 0) {
@@ -179,21 +191,57 @@ export function start_pong_game(maxPoint: number) {
     }
   }
 
+
   function resetBall() {
     ballX = canvas.width / 2;
     ballY = canvas.height / 2;
-    ballSpeedX *= -1; // change direction
+    ballSpeedX = 4;
+    ballSpeedX *= -1;
   }
+
 
   function drawScore(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = 'white';
     ctx.font = '32px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+  
     ctx.fillText(`${leftScore}`, canvas.width / 4, 50);
     ctx.fillText(`${rightScore}`, 3 * canvas.width / 4, 50);
   }
 
-  function render(ctx: CanvasRenderingContext2D, overlayCtx: CanvasRenderingContext2D) {
+  function wait(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function startNewRound(Overlayctx: CanvasRenderingContext2D): Promise<void> {
+    const countdownNumbers = ["3", "2", "1"];
+    resetBall();
+    resetPaddles();
+    waitingForCount = true;
+    for (const number of countdownNumbers) {
+      // Clear everything (this removes paddles/ball)
+      Overlayctx.clearRect(0, 0, Overlayctx.canvas.width, Overlayctx.canvas.height);
+      drawPaddles(Overlayctx);
+      drawScore(Overlayctx);
+      Overlayctx.fillStyle = "white";
+      Overlayctx.font = "80px Arial";
+      Overlayctx.textAlign = "center";
+      Overlayctx.textBaseline = "middle";
+      Overlayctx.fillText(number, Overlayctx.canvas.width / 2, Overlayctx.canvas.height / 2);
+  
+      await wait(500);
+    }
+    Overlayctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    waitingForCount = false;
+  }
+
+let waitingForCount = false;
+
+  async function render(ctx: CanvasRenderingContext2D, overlayCtx: CanvasRenderingContext2D) {
     // Clear screen
+    if (waitingForCount == true)
+        return;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -231,16 +279,14 @@ export function start_pong_game(maxPoint: number) {
     }
 
     if (ballX - ballRadius < 0) {
-      explosionEffect(ballX, ballY, overlayCtx);
+      //explosionEffect(ballX, ballY, overlayCtx);
       rightScore++;
-      resetBall();
-      ballSpeedX = 4;
+      await startNewRound(overlayCtx);
     }
     if (ballX + ballRadius > canvas.width) {
-      explosionEffect(ballX, ballY, overlayCtx);
+      //explosionEffect(ballX, ballY, overlayCtx);
       leftScore++;
-      resetBall();
-      ballSpeedX = 4;
+      await startNewRound(overlayCtx);
     }
     if (leftScore == maxPoint || rightScore == maxPoint)
     {
