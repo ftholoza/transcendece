@@ -1,6 +1,112 @@
 const { db } = require(`../../database/database.js`);
 const UserLoginException = require('../errors/userLogin.js')
 
+async function updateEmail(request, reply) {
+    const username = request.params.username;
+    const { newEmail } = request.body;
+    console.log('Body:', request.body);
+    if (!username) {
+        return reply.status(400).send({ error: "Username is required" });
+    }
+
+    console.log("Update Email called for", username);
+  
+    try {
+        const existingNewMail = await new Promise((resolve, reject) => 
+        {
+            db.get("SELECT * FROM users WHERE email = ?", [newEmail], (err, row) => 
+            {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+        const existingUser = await new Promise((resolve, reject) =>
+        {
+            db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+        });
+  
+    if (!existingUser) {
+        return reply.status(404).send({ error: "Username not found" });
+    }
+
+    if (existingNewMail){
+        return reply.status(400).send({error: "email already in use"});
+    }
+  
+    await new Promise((resolve, reject) => {
+        db.run(
+            "UPDATE users SET email = ? WHERE username = ?",
+            [newEmail, username],
+            function (err) {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
+  
+    reply.status(200).send({ message: `email updated for ${username}.` });
+  
+    } catch (err) {
+        console.error("Error updating user", err);
+        reply.status(500).send({ error: "Unexpected server error" });
+    }
+}
+
+async function updateUsername(request, reply) {
+    const username = request.params.username;
+    const { newUsername } = request.body;
+    console.log('Body:', request.body);
+    if (!username) {
+        return reply.status(400).send({ error: "Username is required" });
+    }
+
+    console.log("Update username called for", username);
+  
+    try {
+        const existingNewUser = await new Promise((resolve, reject) => 
+        {
+            db.get("SELECT * FROM users WHERE username = ?", [newUsername], (err, row) => 
+            {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+        const existingUser = await new Promise((resolve, reject) =>
+        {
+            db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+            if (err) reject(err);
+            else resolve(row);
+        });
+        });
+  
+    if (!existingUser) {
+        return reply.status(404).send({ error: "Username not found" });
+    }
+
+    if (existingNewUser){
+        return reply.status(400).send({error: "username already in use"});
+    }
+  
+    await new Promise((resolve, reject) => {
+        db.run(
+            "UPDATE users SET username = ? WHERE username = ?",
+            [newUsername, username],
+            function (err) {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
+  
+    reply.status(200).send({ message: `username updated for ${username}.` });
+  
+    } catch (err) {
+        console.error("Error updating user", err);
+        reply.status(500).send({ error: "Unexpected server error" });
+    }
+}
+
 
 async function getUserAvatar(request, reply) {
   const username = request.params.username;
@@ -323,6 +429,8 @@ async function deleteUser(request, reply) {
 
 
 module.exports = {
+    updateEmail,
+    updateUsername,
     getUserAvatar,
     UpdateAvatar,
     getAllUsers,
