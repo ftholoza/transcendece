@@ -6,13 +6,20 @@ import { generateLoginPage } from "./loggin.js";
 import { api } from "../services/api.js";
 
 export function generateLoggedPage(): void {
+	document.body.innerHTML = ''; // clear everything
+	document.body.className = ''; // reset all classes
+	document.body.removeAttribute('style');
 	console.log("generateLoggedPage called");
 	const body = document.body;
 	body.classList.add('bg-black', 'text-white', 'font-mono', 'flex', 'justify-center', 'items-center', 'h-screen', 'relative');
 
 	const background = document.createElement('div');
-	background.classList.add('absolute', 'top-0', 'left-0', 'w-full', 'h-full', 'bg-[url("https://www.transparenttextures.com/patterns/black-linen.png")]', 'bg-cover', 'opacity-15', 'animate-[shimmer_8s_infinite_linear]', 'z-[-1]');
-	body.appendChild(background);
+	background.classList.add(
+		'absolute', 'top-0', 'left-0', 'w-full', 'h-full',
+		'bg-[url("https://www.transparenttextures.com/patterns/black-linen.png")]',
+		'bg-cover', 'opacity-15',
+		'animate-[shimmer_8s_infinite_linear]', 'z-[-1]'
+	);	body.appendChild(background);
 
 	const navbar = document.createElement('div');
 	navbar.classList.add('absolute', 'top-10', 'left-1/2', 'transform', '-translate-x-1/2', 'flex', 'space-x-8', 'bg-black', 'bg-opacity-60', 'p-4', 'rounded-lg', 'shadow-lg');
@@ -45,10 +52,11 @@ export function generateLoggedPage(): void {
 	// Title
 	const title = document.createElement('h1');
 	title.textContent = 'TRANSCENDENCE';
-	title.style.fontFamily = 'monospace';
-	title.style.fontSize = '64px';
+	title.style.fontFamily = '"Press Start 2P", monospace';
+	title.style.fontSize = '32px'; // smaller is better for pixel font
 	title.style.color = '#00ff00';
-	title.style.textShadow = '0 0 10px #00ff00'; // optional glow
+	title.style.textShadow = '0 0 10px #00ff00';
+	title.style.marginBottom = '20px';
 	container.appendChild(title);
   
 	// Game menu buttons

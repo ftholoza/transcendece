@@ -3,19 +3,14 @@ const formbody = require('@fastify/formbody');
 const fastifyCors = require("@fastify/cors");
 const fastifyStatic = require("@fastify/static");
 const fastifyCookie = require("@fastify/cookie");
+const fastifyMultipart = require('@fastify/multipart');
 
+fastify.register(fastifyMultipart);
 const logger = require("./utils/logger");
 
 const userRoutes = require("./routes/userRoutes");
 const fs = require("fs").promises;
 const path = require("node:path");
-
-// console.log(path.resolve(__dirname, '/../../.env'));
-// const result = require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
-// if (result.error) {
-//     console.log('env not pull');
-// }
 
 fastify.register(fastifyCookie, {
     secret: process.env.COOKIE_SECRET

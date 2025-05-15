@@ -24,16 +24,9 @@ export const generateLoginPage = () : void => {
 	);
 
 	// Créer le titre avec effet néon
-	const title = document.createElement('h2');
-	title.classList.add(
-		'text-4xl',  // Augmentation de la taille
-		'text-green-500',
-		'font-[PressStart2P]',
-		'text-shadow-[0_0_10px_#00ff00,_0_0_20px_#00ff00,_0_0_30px_#00ff00]',
-		'text-center',
-		'mb-6'  // Espacement sous le titre
-	);
-	title.textContent = 'Login to Transcendence';
+	const title = document.createElement('h2');;
+	title.classList.add('text-2xl', 'mb-5', 'text-green-400', 'uppercase', 'tracking-widest', 'neon-glow');
+	title.textContent = 'Login';
 	loginContainer.appendChild(title);
 
 	// Créer le formulaire
@@ -148,6 +141,7 @@ export const generateLoginPage = () : void => {
 		event.preventDefault();
 		const username = document.getElementById('username') as HTMLInputElement;
 		const password = document.getElementById('password') as HTMLInputElement;
+		localStorage.setItem('username', username.value);
 
 		api.login(username.value, password.value);
 	});
