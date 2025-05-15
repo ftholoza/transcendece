@@ -1,4 +1,5 @@
 import { start_pong_game } from "./pong.js";
+import { endTournamentScreen } from "./endTournament.js";
 
 type Matchup = [string, string][];
 
@@ -219,6 +220,7 @@ function createPlayerRegistrationForm(container: HTMLElement, count: number, Max
   
     const finalWinner = currentPlayers[0];
     console.log("🏆 Gagnant du tournoi :", finalWinner);
+    endTournamentScreen(finalWinner);
   };
 
   container.appendChild(form);
