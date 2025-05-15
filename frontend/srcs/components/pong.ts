@@ -5,43 +5,259 @@ const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 5;
 
-let leftPaddleY = 250;
-let rightPaddleY = 250;
-
-let leftScore = 0;
-let rightScore = 0;
-
-let ballX = 400;
-let ballY = 300;
-let ballRadius = 10;
-let ballSpeedX = 4;
-let ballSpeedY = 3;
-
-type Particle = {
-  x: number;
-  y: number;
-  radius: number;
-  dx: number;
-  dy: number;
-  alpha: number;
+type GameState = {
+  leftPaddleY: number;
+  rightPaddleY: number;
+  leftScore: number;
+  rightScore: number;
+  ballX: number;
+  ballY: number;
+  ballRadius: number;
+  ballSpeedX: number;
+  ballSpeedY: number;
+  keysPressed: Record<string, boolean>;
+  waitingForCount: boolean;
+  maxPoint: number;
 };
 
-const particles: Particle[] = [];
+function resetGameState(gameState: GameState) {
+  gameState.leftPaddleY = 250;
+  gameState.rightPaddleY = 250;
+  gameState.leftScore = 0;
+  gameState.rightScore = 0;
+  gameState.ballX = 400;
+  gameState.ballY = 300;
+  gameState.ballSpeedX = 4;
+  gameState.ballSpeedY = 3;
+  gameState.waitingForCount = false;
 
-const keysPressed: Record<string, boolean> = {};
+  for (const key in gameState.keysPressed) {
+    gameState.keysPressed[key] = false;
+  }
+}
 
-export function start_pong_game(maxPoint: number) {
+function resetPaddles(gameState: GameState) {
+  gameState.leftPaddleY = 250;
+  gameState.rightPaddleY = 250;
+}
+
+  
+function drawPaddles(ctx: CanvasRenderingContext2D, gameState: GameState) {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(20, gameState.leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
+  ctx.fillRect(770, gameState.rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
+}
+
+function drawBall(ctx: CanvasRenderingContext2D, gameState: GameState) {
+  ctx.beginPath();
+  ctx.arc(gameState.ballX, gameState.ballY, gameState.ballRadius, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.closePath();
+}
+
+
+function updatePaddles(keysPressed: Record<string, boolean>, gameState: GameState, canvasHeight: number) {
+  if (keysPressed['w'] && gameState.leftPaddleY > 0) {
+    gameState.leftPaddleY -= PADDLE_SPEED;
+  }
+  if (keysPressed['s'] && gameState.leftPaddleY < canvasHeight - PADDLE_HEIGHT) {
+    gameState.leftPaddleY += PADDLE_SPEED;
+  }
+  if (keysPressed['ArrowUp'] && gameState.rightPaddleY > 0) {
+    gameState.rightPaddleY -= PADDLE_SPEED;
+  }
+  if (keysPressed['ArrowDown'] && gameState.rightPaddleY < canvasHeight - PADDLE_HEIGHT) {
+    gameState.rightPaddleY += PADDLE_SPEED;
+  }
+}
+
+function resetBall(gameState: GameState, canvasWidth: number, canvasHeight: number) {
+  gameState.ballX = canvasWidth / 2;
+  gameState.ballY = canvasHeight / 2;
+  gameState.ballSpeedX = -4;
+  gameState.ballSpeedY = 4;
+}
+
+
+function drawScoreAndNames(
+  ctx: CanvasRenderingContext2D,
+  gameState: GameState,
+  leftName: string,
+  rightName: string
+) {
+  ctx.fillStyle = 'white';
+  ctx.font = '32px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+
+  ctx.fillText(`${gameState.leftScore}`, ctx.canvas.width / 4, 50);
+  ctx.fillText(`${gameState.rightScore}`, 3 * ctx.canvas.width / 4, 50);
+
+  ctx.font = '20px Arial';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(leftName, ctx.canvas.width / 4, 48);
+  ctx.fillText(rightName, 3 * ctx.canvas.width / 4, 48);
+}
+
+function wait(ms: number): Promise<void> 
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function startNewRound(
+  overlayCtx: CanvasRenderingContext2D,
+  gameState: GameState,
+  leftName: string,
+  rightName: string,
+  canvasWidth: number,
+  canvasHeight: number
+) {
+  const countdownNumbers = ["3", "2", "1"];
+  resetBall(gameState, canvasWidth, canvasHeight);
+  resetPaddles(gameState);
+  gameState.waitingForCount = true;
+
+  for (const number of countdownNumbers) {
+    overlayCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+    drawPaddles(overlayCtx, gameState);
+    drawScoreAndNames(overlayCtx, gameState, leftName, rightName);
+    overlayCtx.fillStyle = "white";
+    overlayCtx.font = "80px Arial";
+    overlayCtx.textAlign = "center";
+    overlayCtx.textBaseline = "middle";
+    overlayCtx.fillText(number, canvasWidth / 2, canvasHeight / 2);
+
+    await wait(500);
+  }
+
+  overlayCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+  gameState.waitingForCount = false;
+}
+
+function render(
+  ctx: CanvasRenderingContext2D,
+  overlayCtx: CanvasRenderingContext2D,
+  gameState: GameState,
+  canvas: HTMLCanvasElement,
+  player1: string,
+  player2: string,
+  maxPoint: number,
+  resolve: (winner: string) => void
+): void {
+  if (gameState.waitingForCount) {
+    requestAnimationFrame(() =>
+      render(ctx, overlayCtx, gameState, canvas, player1, player2, maxPoint, resolve)
+    );
+    return;
+  }
+
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  updatePaddles(gameState.keysPressed, gameState, canvas.height);
+
+  gameState.ballX += gameState.ballSpeedX;
+  gameState.ballY += gameState.ballSpeedY;
+
+  // Paddle collisions
+  if (
+    gameState.ballX - gameState.ballRadius <= 20 + PADDLE_WIDTH &&
+    gameState.ballY >= gameState.leftPaddleY &&
+    gameState.ballY <= gameState.leftPaddleY + PADDLE_HEIGHT
+  ) {
+    gameState.ballSpeedX *= -1.1;
+    gameState.ballSpeedY *= 1.1;
+    const hitPoint = gameState.ballY - (gameState.leftPaddleY + PADDLE_HEIGHT / 2);
+    gameState.ballSpeedY = (hitPoint / (PADDLE_HEIGHT / 2)) * 5;
+    gameState.ballX = 20 + PADDLE_WIDTH + gameState.ballRadius;
+  }
+
+  if (
+    gameState.ballX + gameState.ballRadius >= 770 &&
+    gameState.ballY >= gameState.rightPaddleY &&
+    gameState.ballY <= gameState.rightPaddleY + PADDLE_HEIGHT
+  ) {
+    gameState.ballSpeedX *= -1.1;
+    gameState.ballSpeedY *= 1.1;
+    const hitPoint = gameState.ballY - (gameState.rightPaddleY + PADDLE_HEIGHT / 2);
+    gameState.ballSpeedY = (hitPoint / (PADDLE_HEIGHT / 2)) * 5;
+    gameState.ballX = 770 - gameState.ballRadius;
+  }
+
+  // Scoring
+  if (gameState.ballX - gameState.ballRadius < 0) {
+    gameState.rightScore++;
+    if (gameState.rightScore < maxPoint) {
+      startNewRound(overlayCtx, gameState, player1, player2, canvas.width, canvas.height);
+    }
+  }
+
+  if (gameState.ballX + gameState.ballRadius > canvas.width) {
+    gameState.leftScore++;
+    if (gameState.leftScore < maxPoint) {
+      startNewRound(overlayCtx, gameState, player1, player2, canvas.width, canvas.height);
+    }
+  }
+
+  // End condition
+  if (gameState.leftScore === maxPoint || gameState.rightScore === maxPoint) {
+    const winner = gameState.leftScore === maxPoint ? player1 : player2;
+    endGameScreen(winner);
+    resetGameState(gameState);
+    resolve(winner);
+    return;
+  }
+
+  if (
+    gameState.ballY - gameState.ballRadius < 0 ||
+    gameState.ballY + gameState.ballRadius > canvas.height
+  ) {
+    gameState.ballSpeedY *= -1;
+  }
+
+  drawPaddles(ctx, gameState);
+  drawBall(ctx, gameState);
+  drawScoreAndNames(ctx, gameState, player1, player2);
+
+  requestAnimationFrame(() =>
+    render(ctx, overlayCtx, gameState, canvas, player1, player2, maxPoint, resolve)
+  );
+}
+
+
+export async function start_pong_game(
+  maxPoint: number,
+  player1: string,
+  player2: string
+): Promise<string> {
+  const gameState: GameState = {
+    leftPaddleY: 250,
+    rightPaddleY: 250,
+    leftScore: 0,
+    rightScore: 0,
+    ballX: 400,
+    ballY: 300,
+    ballRadius: 10,
+    ballSpeedX: 4,
+    ballSpeedY: 3,
+    waitingForCount: false,
+    keysPressed: {},
+    maxPoint: maxPoint,
+  };
+
+  resetGameState(gameState);
 
   document.body.innerHTML = '';
+
   const container = document.createElement('div');
   container.style.position = 'relative';
   container.style.width = '820px';
   container.style.height = '620px';
-  container.style.margin = '0 auto'; // Center horizontally
+  container.style.margin = '0 auto';
   container.style.display = 'block';
   container.style.zIndex = '0';
   container.style.border = '10px solid white';
-
   document.body.appendChild(container);
 
   const canvas = document.createElement('canvas');
@@ -66,17 +282,17 @@ export function start_pong_game(maxPoint: number) {
   overlayCanvas.style.pointerEvents = 'none';
   overlayCanvas.style.zIndex = '2';
   overlayCanvas.style.backgroundColor = 'transparent';
-
   container.appendChild(overlayCanvas); 
-  
+
   const overlayCtx = overlayCanvas.getContext('2d');
   if (!overlayCtx) throw new Error("Overlay canvas not supported");
 
-
-
-  // --- Keyboard Input ---
   window.addEventListener('keydown', (e) => {
-    keysPressed[e.key] = true;
+    gameState.keysPressed[e.key] = true;
+  });
+
+  window.addEventListener('keyup', (e) => {
+    gameState.keysPressed[e.key] = false;
   });
 
   const exitButton = document.createElement('button');
@@ -89,232 +305,13 @@ export function start_pong_game(maxPoint: number) {
   exitButton.style.zIndex = '1';
   document.body.appendChild(exitButton);
 
-  let gameRunning = true;
-
   exitButton.addEventListener('click', () => {
-    gameRunning = false;
+    gameState.waitingForCount = false;
     document.body.innerHTML = '';
     generateLoggedPage();
   });
-    
 
-  window.addEventListener('keyup', (e) => {
-    keysPressed[e.key] = false;
+  return new Promise<string>((resolve) => {
+    render(ctx, overlayCtx, gameState, canvas, player1, player2, maxPoint, resolve);
   });
-
-
-  function explosionEffect(x: number, y: number, ctx: CanvasRenderingContext2D) {
-    const particles: {
-      x: number;
-      y: number;
-      dx: number;
-      dy: number;
-      alpha: number;
-      radius: number;
-    }[] = [];
-  
-    for (let i = 0; i < 20; i++) {
-      particles.push({
-        x,
-        y,
-        dx: (Math.random() - 0.5) * 4,
-        dy: (Math.random() - 0.5) * 4,
-        alpha: 1,
-        radius: 3 + Math.random() * 2,
-      });
-    }
-  
-    function animate() {
-      ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-  
-      particles.forEach(p => {
-        p.x += p.dx;
-        p.y += p.dy;
-        p.alpha -= 0.03;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 200, 0, ${p.alpha})`;
-        ctx.fill();
-      });
-  
-      // Remove particles that are invisible
-      const activeParticles = particles.filter(p => p.alpha > 0);
-      if (activeParticles.length > 0) {
-        requestAnimationFrame(animate);
-      } else {
-        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-      }
-    }
-  
-    animate();
-  }
-
-
-
-  function resetPaddles()
-  {
-    leftPaddleY = 250;
-    rightPaddleY = 250;
-  }
-  
-  function drawPaddles(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(20, leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-    ctx.fillRect(770, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-  }
-
-  function drawBall(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-  }
-
-
-
-  function updatePaddles() {
-    // Left paddle (W/S)
-    if (keysPressed['w'] && leftPaddleY > 0) {
-      leftPaddleY -= PADDLE_SPEED;
-    }
-    if (keysPressed['s'] && leftPaddleY < canvas.height - PADDLE_HEIGHT) {
-      leftPaddleY += PADDLE_SPEED;
-    }
-
-    // Right paddle (ArrowUp/ArrowDown)
-    if (keysPressed['ArrowUp'] && rightPaddleY > 0) {
-      rightPaddleY -= PADDLE_SPEED;
-    }
-    if (keysPressed['ArrowDown'] && rightPaddleY < canvas.height - PADDLE_HEIGHT) {
-      rightPaddleY += PADDLE_SPEED;
-    }
-  }
-
-
-  function resetBall() {
-    ballX = canvas.width / 2;
-    ballY = canvas.height / 2;
-    ballSpeedX = 4;
-    ballSpeedX *= -1;
-  }
-
-
-  function drawScore(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = 'white';
-    ctx.font = '32px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-  
-    ctx.fillText(`${leftScore}`, canvas.width / 4, 50);
-    ctx.fillText(`${rightScore}`, 3 * canvas.width / 4, 50);
-  }
-
-  function wait(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  async function startNewRound(Overlayctx: CanvasRenderingContext2D): Promise<void> {
-    const countdownNumbers = ["3", "2", "1"];
-    resetBall();
-    resetPaddles();
-    waitingForCount = true;
-    for (const number of countdownNumbers) {
-      // Clear everything (this removes paddles/ball)
-      Overlayctx.clearRect(0, 0, Overlayctx.canvas.width, Overlayctx.canvas.height);
-      drawPaddles(Overlayctx);
-      drawScore(Overlayctx);
-      Overlayctx.fillStyle = "white";
-      Overlayctx.font = "80px Arial";
-      Overlayctx.textAlign = "center";
-      Overlayctx.textBaseline = "middle";
-      Overlayctx.fillText(number, Overlayctx.canvas.width / 2, Overlayctx.canvas.height / 2);
-  
-      await wait(500);
-    }
-    Overlayctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    waitingForCount = false;
-  }
-
-let waitingForCount = false;
-
-  async function render(ctx: CanvasRenderingContext2D, overlayCtx: CanvasRenderingContext2D) {
-    // Clear screen
-    if (waitingForCount == true)
-        return;
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Update game state
-    updatePaddles();
-
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-
-    if (
-      ballX - ballRadius <= 20 + PADDLE_WIDTH &&
-      ballY >= leftPaddleY &&
-      ballY <= leftPaddleY + PADDLE_HEIGHT
-    ) {
-      ballSpeedX *= 1.1;
-      ballSpeedX *= -1;
-      const hitPoint = ballY - (leftPaddleY + PADDLE_HEIGHT / 2);
-      const normalized = hitPoint / (PADDLE_HEIGHT / 2);
-      ballSpeedY = normalized * 5;
-      ballX = 20 + PADDLE_WIDTH + ballRadius;
-    }
-    
-    // Collision with right paddle
-    if (
-      ballX + ballRadius >= 770 &&
-      ballY >= rightPaddleY &&
-      ballY <= rightPaddleY + PADDLE_HEIGHT
-    ) {
-      ballSpeedY *= 1.1;
-      ballSpeedX *= -1;
-      const hitPoint = ballY - (rightPaddleY + PADDLE_HEIGHT / 2);
-      const normalized = hitPoint / (PADDLE_HEIGHT / 2);
-      ballSpeedY = normalized * 5;
-      ballX = 770 - ballRadius;
-    }
-
-    if (ballX - ballRadius < 0) {
-      //explosionEffect(ballX, ballY, overlayCtx);
-      rightScore++;
-      await startNewRound(overlayCtx);
-    }
-    if (ballX + ballRadius > canvas.width) {
-      //explosionEffect(ballX, ballY, overlayCtx);
-      leftScore++;
-      await startNewRound(overlayCtx);
-    }
-    if (leftScore == maxPoint || rightScore == maxPoint)
-    {
-      gameRunning = false;
-      if (leftScore == maxPoint)
-        endGameScreen("left");
-      else
-        endGameScreen("right"); 
-    }
-
-    // Bounce off top and bottom
-    if (ballY - ballRadius < 0 || ballY + ballRadius > canvas.height) {
-      ballSpeedY *= -1;
-    }
-
-    drawPaddles(ctx);
-    drawBall(ctx);
-    drawScore(ctx);
-    if (gameRunning == true)
-      requestAnimationFrame(() => render(ctx, overlayCtx));
-    else
-    {
-      resetBall();
-      resetPaddles();
-      leftScore = 0;
-      rightScore = 0;
-    }
-  }
-
-  render(ctx, overlayCtx);
 }
