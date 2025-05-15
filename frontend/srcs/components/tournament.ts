@@ -1,4 +1,8 @@
 import { start_pong_game } from "./pong.js";
+import { endTournamentScreen } from "./endTournament.js";
+
+type Matchup = [string, string][];
+
 
 export function generateTournament() {
     document.body.innerHTML = ''; // clear current page
@@ -27,12 +31,26 @@ export function generateTournament() {
     playerCountInput.style.margin = '10px';
     container.appendChild(playerCountInput);
   
+    const maxPointLabel = document.createElement('label');
+    maxPointLabel.textContent = 'Points pour gagner un match : ';
+    container.appendChild(maxPointLabel);
+  
+    const maxPointInput = document.createElement('input');
+    maxPointInput.type = 'number';
+    maxPointInput.min = '1';
+    maxPointInput.value = '5';
+    maxPointInput.style.margin = '10px';
+    container.appendChild(maxPointInput);
+  
+    container.appendChild(document.createElement('br'));
+
     const generateButton = document.createElement('button');
     generateButton.textContent = 'Valider';
     generateButton.style.margin = '10px';
     generateButton.onclick = () => {
       const count = parseInt(playerCountInput.value);
-      createPlayerRegistrationForm(container, count);
+      const MaxPoint = parseInt(maxPointInput.value);
+      //createPlayerRegistrationForm(container, count, MaxPoint);
     };
     container.appendChild(generateButton);
 }
