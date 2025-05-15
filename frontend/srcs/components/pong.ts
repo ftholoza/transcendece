@@ -18,6 +18,7 @@ type GameState = {
   keysPressed: Record<string, boolean>;
   waitingForCount: boolean;
   maxPoint: number;
+  gamestatus: boolean;
 };
 
 function resetGameState(gameState: GameState) {
@@ -30,6 +31,7 @@ function resetGameState(gameState: GameState) {
   gameState.ballSpeedX = 4;
   gameState.ballSpeedY = 3;
   gameState.waitingForCount = false;
+  gameState.gamestatus = false;
 
   for (const key in gameState.keysPressed) {
     gameState.keysPressed[key] = false;
@@ -152,6 +154,8 @@ function render(
     return;
   }
 
+  if (gameState.gamestatus == false)
+    return ;
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -244,10 +248,11 @@ export async function start_pong_game(
     waitingForCount: false,
     keysPressed: {},
     maxPoint: maxPoint,
+    gamestatus: false,
   };
 
   resetGameState(gameState);
-
+  gameState.gamestatus = true;
   document.body.innerHTML = '';
 
   const container = document.createElement('div');
@@ -295,23 +300,25 @@ export async function start_pong_game(
     gameState.keysPressed[e.key] = false;
   });
 
-  const exitButton = document.createElement('button');
-  exitButton.textContent = 'Exit';
-  exitButton.style.position = 'absolute';
-  exitButton.style.top = '20px';
-  exitButton.style.right = '20px';
-  exitButton.style.padding = '10px 20px';
-  exitButton.style.fontSize = '16px';
-  exitButton.style.zIndex = '1';
-  document.body.appendChild(exitButton);
-
-  exitButton.addEventListener('click', () => {
-    gameState.waitingForCount = false;
-    document.body.innerHTML = '';
-    generateLoggedPage();
-  });
-
   return new Promise<string>((resolve) => {
+    const exitButton = document.createElement('button');
+    exitButton.textContent = 'Exit';
+    exitButton.style.position = 'absolute';
+    exitButton.style.top = '20px';
+    exitButton.style.right = '20px';
+    exitButton.style.padding = '10px 20px';
+    exitButton.style.fontSize = '16px';
+    exitButton.style.zIndex = '1';
+    document.body.appendChild(exitButton);
+
+    exitButton.addEventListener('click', () => {
+      gameState.waitingForCount = false;
+      document.body.innerHTML = '';
+      generateLoggedPage();
+      gameState.gamestatus = false;
+      resolve("EXIT");
+    });
+
     render(ctx, overlayCtx, gameState, canvas, player1, player2, maxPoint, resolve);
   });
 }
