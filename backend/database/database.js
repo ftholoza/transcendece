@@ -1,11 +1,12 @@
-const sqlite3Pkg = require('sqlite3');
+const sqlite3 = require('sqlite3').verbose();
+require('dotenv').config();
 const logger = require("../srcs/utils/logger");
 const dbConnexionException = require("../srcs/errors/dbConnexion");
-const sqlite3 = sqlite3Pkg.verbose();
+const fs = require('fs');
+const path = require('path');
 
 function connected(err) {
 	try {
-
 		if (err) {
 			throw new dbConnexionException();
 		}
@@ -19,7 +20,15 @@ function connected(err) {
 	}
 }
 
-const db = new sqlite3.Database('/usr/src/app/database/mydata.db', sqlite3.OPEN_READWRITE, connected);
+// Ensure database directory exists
+const dbPath = process.env.DB_PATH || 'database/mydata.db';
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+	fs.mkdirSync(dbDir, { recursive: true });
+}
+
+// Create database connection
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, connected);
 
 const sql = `CREATE TABLE IF NOT EXISTS users(
     id INTEGER PRIMARY KEY,

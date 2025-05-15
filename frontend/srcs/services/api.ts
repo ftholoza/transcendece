@@ -24,7 +24,7 @@ async function getUserByUsername(username: string) {
 			localStorage.setItem("avatar", avatarUrl);
 			const email = localStorage.getItem("email");
 			console.log(email);
-			
+
 		} else {
 			const errorField = document.getElementById('error-field');
 			if (!errorField) return;
@@ -36,7 +36,7 @@ async function getUserByUsername(username: string) {
 		console.error('Error:', error);
 		alert('An error occurred. Please try again.');
 	}
-	
+
 }
 
 async function login(username: string, password: string) {

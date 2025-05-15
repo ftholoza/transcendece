@@ -1,5 +1,9 @@
 const { db } = require(`../../database/database.js`);
 const UserLoginException = require('../errors/userLogin.js')
+const bcrypt = require('bcrypt');
+require('dotenv').config();
+
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
 
 async function updateEmail(request, reply) {
     const username = request.params.username;
@@ -10,11 +14,11 @@ async function updateEmail(request, reply) {
     }
 
     console.log("Update Email called for", username);
-  
+
     try {
-        const existingNewMail = await new Promise((resolve, reject) => 
+        const existingNewMail = await new Promise((resolve, reject) =>
         {
-            db.get("SELECT * FROM users WHERE email = ?", [newEmail], (err, row) => 
+            db.get("SELECT * FROM users WHERE email = ?", [newEmail], (err, row) =>
             {
                 if (err) reject(err);
                 else resolve(row);
@@ -27,7 +31,7 @@ async function updateEmail(request, reply) {
             else resolve(row);
         });
         });
-  
+
     if (!existingUser) {
         return reply.status(404).send({ error: "Username not found" });
     }
@@ -35,7 +39,7 @@ async function updateEmail(request, reply) {
     if (existingNewMail){
         return reply.status(400).send({error: "email already in use"});
     }
-  
+
     await new Promise((resolve, reject) => {
         db.run(
             "UPDATE users SET email = ? WHERE username = ?",
@@ -45,9 +49,9 @@ async function updateEmail(request, reply) {
             else resolve();
         });
     });
-  
+
     reply.status(200).send({ message: `email updated for ${username}.` });
-  
+
     } catch (err) {
         console.error("Error updating user", err);
         reply.status(500).send({ error: "Unexpected server error" });
@@ -63,11 +67,11 @@ async function updateUsername(request, reply) {
     }
 
     console.log("Update username called for", username);
-  
+
     try {
-        const existingNewUser = await new Promise((resolve, reject) => 
+        const existingNewUser = await new Promise((resolve, reject) =>
         {
-            db.get("SELECT * FROM users WHERE username = ?", [newUsername], (err, row) => 
+            db.get("SELECT * FROM users WHERE username = ?", [newUsername], (err, row) =>
             {
                 if (err) reject(err);
                 else resolve(row);
@@ -80,7 +84,7 @@ async function updateUsername(request, reply) {
             else resolve(row);
         });
         });
-  
+
     if (!existingUser) {
         return reply.status(404).send({ error: "Username not found" });
     }
@@ -88,7 +92,7 @@ async function updateUsername(request, reply) {
     if (existingNewUser){
         return reply.status(400).send({error: "username already in use"});
     }
-  
+
     await new Promise((resolve, reject) => {
         db.run(
             "UPDATE users SET username = ? WHERE username = ?",
@@ -98,9 +102,9 @@ async function updateUsername(request, reply) {
             else resolve();
         });
     });
-  
+
     reply.status(200).send({ message: `username updated for ${username}.` });
-  
+
     } catch (err) {
         console.error("Error updating user", err);
         reply.status(500).send({ error: "Unexpected server error" });
@@ -293,7 +297,6 @@ async function userLogin(request, reply) {
 
         const existingUser = await new Promise((resolve, reject) => {
             db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-
                 console.log("🟢 Query executed");
 
                 if (err) {
@@ -311,7 +314,8 @@ async function userLogin(request, reply) {
 
         console.log("Checking password...");
 
-        if (password === existingUser.password) {
+        const passwordMatch = await bcrypt.compare(password, existingUser.password);
+        if (passwordMatch) {
             console.log("User logged in successfully:", username);
             console.log("Sending response...");
             return reply.status(200).send({ message: "User connected successfully", username });
@@ -328,7 +332,6 @@ async function userLogin(request, reply) {
         console.error("Error in userLogin:", error);
         return reply.status(500).send({ error: "Internal Server Error" });
     }
-    console.log("still here");
 }
 
 async function createUser(request, reply) {
@@ -339,7 +342,7 @@ async function createUser(request, reply) {
         if (!username || !password || !email) {
             return reply.status(400).send({ error: "Username, password, email required" });
         }
-        if (Object.values(password).length < 6)
+        if (password.length < 6)
             return reply.status(400).send({ error: "password too short" });
 
         const existingUser = await new Promise((resolve, reject) => {
@@ -355,12 +358,22 @@ async function createUser(request, reply) {
         if (existingUser)
             return reply.status(400).send({ error: "Username already taken" });
 
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
         console.log(`Creating user: ${username}`);
-        const result = await db.run(
-            'INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
-            [username, password, email]
-          );
-        reply.status(201).send({ message: "User registred successfully", username });
+        await new Promise((resolve, reject) => {
+            db.run(
+                'INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
+                [username, hashedPassword, email],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                }
+            );
+        });
+
+        reply.status(201).send({ message: "User registered successfully", username });
     } catch (error) {
         console.error("Error creating user:", error);
         reply.status(500).send({ error: "Internal Server Error" });
@@ -388,10 +401,14 @@ async function updateUser(request, reply) {
         if (existingUser) {
             return reply.status(400).send({ error: "Username already taken" });
         }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
         const query = "UPDATE users SET username = ?, password = ? WHERE id = ?";
 
         await new Promise((resolve, reject) => {
-            db.run(query, [username, password, id], function (err) {
+            db.run(query, [username, hashedPassword, id], function (err) {
                 if (err) {
                     reject(err);
                 } else {
