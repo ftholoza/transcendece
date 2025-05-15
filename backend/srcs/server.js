@@ -15,7 +15,7 @@ const path = require("node:path");
 fastify.register(fastifyCookie, {
     secret: process.env.COOKIE_SECRET
 });
-
+  
 fastify.register(fastifyCors, {
     origin: true,
     methods: ["GET", "POST", "PUT", "DELETE"],

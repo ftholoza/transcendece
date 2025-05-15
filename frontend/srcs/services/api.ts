@@ -78,6 +78,20 @@ async function register(username: string, email: string, password: string) {
 		const result = await response.json();
 
 		if (response.ok) {
+			const imgResponse = await fetch('/Default.png');
+			if (!imgResponse.ok) throw new Error('Image not found at /Default.png');
+			const imgBlob = await imgResponse.blob();
+			const formData = new FormData();
+			formData.append('avatar', imgBlob, 'default.png');
+
+			const res = await fetch(`http://localhost:3000/api/users/avatar/${encodeURIComponent(username)}`, {
+			method: 'PUT',
+			body: formData
+			});
+
+			if (res.ok) {
+				console.log("default avatar added");
+			}
 			localStorage.setItem('username', username);
 			clearPage();
 			generateLoginPage();
