@@ -1,11 +1,15 @@
 import {createHomePage} from "./components/home.js";
 import {generateLoggedPage} from "./components/logged.js";
-import {getState} from "./states/state.js";
+import { api } from "./services/api.js";
 
-const state = getState();
+(async () => {
+	const log = await api.isAlreadyLog();
 
-if (!state.isAuthenticated) {
-	createHomePage();
-} else {
-	generateLoggedPage();
-}
+	if (log) {
+		generateLoggedPage();
+	} else {
+		createHomePage();
+	}
+})();
+
+

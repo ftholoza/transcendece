@@ -4,6 +4,7 @@ import { createProfilePage } from "./profilePage.js";
 import { clearPage } from "../utils/clear.js";
 import { generateLoginPage } from "./loggin.js";
 import { generateTournament } from "./tournament.js";
+import { api } from "../services/api.js";
 
 export function generateLoggedPage(): void {
 	document.body.innerHTML = ''; // clear everything
@@ -32,9 +33,7 @@ export function generateLoggedPage(): void {
 			link.addEventListener('click', () => {
 		switch (text) {
 			case 'Disconnect':
-				localStorage.clear();
-				clearPage();
-				generateLoginPage();
+				api.disconnect();
 				break;
 		}
 	});
