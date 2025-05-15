@@ -3,6 +3,7 @@ import { showStartMenu } from "./startMenu.js";
 import { createProfilePage } from "./profilePage.js";
 import { clearPage } from "../utils/clear.js";
 import { generateLoginPage } from "./loggin.js";
+import { api } from "../services/api.js";
 
 export function generateLoggedPage(): void {
 	console.log("generateLoggedPage called");
@@ -24,8 +25,7 @@ export function generateLoggedPage(): void {
 			link.addEventListener('click', () => {
 		switch (text) {
 			case 'Disconnect':
-				clearPage();
-				generateLoginPage();
+				api.disconnect();
 				break;
 		}
 	});

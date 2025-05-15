@@ -1,6 +1,6 @@
+import { createHomePage } from "../components/home.js";
 import {generateLoggedPage} from "../components/logged.js";
 import {generateLoginPage} from "../components/loggin.js";
-import {setUser} from "../states/state.js";
 import {clearPage} from "../utils/clear.js";
 
 async function login(username: string, password: string) {
@@ -14,8 +14,6 @@ async function login(username: string, password: string) {
 		const result = await response.json();
 
 		if (response.ok) {
-			localStorage.setItem("username", username);
-			setUser(username);
 			clearPage();
 			generateLoggedPage();
 		} else {
@@ -56,7 +54,51 @@ async function register(username: string, email: string, password: string) {
 	}
 }
 
+async function isAlreadyLog() {
+	try {
+		const response = await fetch('http://localhost:3000/api/session', {
+			method: 'GET',
+			headers : {
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include'
+		});
+
+		const result = await response.json();
+
+		if (response.ok) {
+			return true;
+		}
+		return false;
+	} catch (err) {
+		console.error(err);
+		return false;
+	}
+}
+
+async function disconnect() {
+	try {
+		const response = await fetch('http://localhost:3000/api/logout', {
+			method: 'POST',
+			credentials: 'include'
+		});
+
+		if (response.ok) {
+			clearPage();
+			createHomePage();
+			
+		} else {
+			alert("Fail to disconnect");
+		}
+	} catch (err) {
+		console.error('Error:', err);
+		alert('An error occurred. Please try again.');
+	}
+}
+
 export const api = {
 	login,
-	register
+	register,
+	isAlreadyLog,
+	disconnect
 };

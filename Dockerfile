@@ -9,6 +9,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY postcss.config.js ./
 COPY tailwind.config.js ./
+COPY .env ./
 
 # Install all dependencies
 RUN npm install
@@ -24,7 +25,6 @@ RUN npm run build
 
 # Expose app port
 EXPOSE 3000
-RUN ls node_modules | grep fastify
 
 
 # Start the app

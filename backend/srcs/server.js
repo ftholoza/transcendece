@@ -1,7 +1,8 @@
-const fastify = require('fastify')({ logger: true, requestTimeout: 5000});
-const cors = require("@fastify/cors");
+const fastify = require('fastify')({ logger: false, requestTimeout: 5000});
 const formbody = require('@fastify/formbody');
+const fastifyCors = require("@fastify/cors");
 const fastifyStatic = require("@fastify/static");
+const fastifyCookie = require("@fastify/cookie");
 
 const logger = require("./utils/logger");
 
@@ -9,12 +10,21 @@ const userRoutes = require("./routes/userRoutes");
 const fs = require("fs").promises;
 const path = require("node:path");
 
-fastify.register(cors, (instance) => (req, callback) => {
-    const corsOptions = {
-        origin: true, // Allow all origins
-        methods: ["GET", "POST", "PUT", "DELETE"],
-    };
-    callback(null, corsOptions);
+// console.log(path.resolve(__dirname, '/../../.env'));
+// const result = require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+// if (result.error) {
+//     console.log('env not pull');
+// }
+
+fastify.register(fastifyCookie, {
+    secret: process.env.COOKIE_SECRET
+});
+
+fastify.register(fastifyCors, {
+    origin: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
 });
 
 fastify.addContentTypeParser("application/json", { parseAs: "string" }, (req, body, done) => {
@@ -35,7 +45,6 @@ fastify.register(userRoutes, {prefix: "/api"});
 
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "../../frontend/public"),
-    // prefix: "/public/"
 });
 
 fastify.get("/", async (request, reply) => {
