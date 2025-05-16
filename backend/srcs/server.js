@@ -9,17 +9,19 @@ fastify.register(fastifyMultipart);
 const logger = require("./utils/logger");
 
 const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
 const fs = require("fs").promises;
 const path = require("node:path");
 
 fastify.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECRET
+    secret: process.env.COOKIE_SECRET || 'your-fallback-secret-key'
 });
 
 fastify.register(fastifyCors, {
     origin: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 });
 
 fastify.addContentTypeParser("application/json", { parseAs: "string" }, (req, body, done) => {
@@ -32,11 +34,8 @@ fastify.addContentTypeParser("application/json", { parseAs: "string" }, (req, bo
 
 fastify.register(formbody);
 
-// setInterval(() => {
-//     console.log("⏳ Event loop is still alive...");
-// }, 5000);
-
 fastify.register(userRoutes, {prefix: "/api"});
+fastify.register(authRoutes, {prefix: "/api"});
 
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "../../frontend/public"),

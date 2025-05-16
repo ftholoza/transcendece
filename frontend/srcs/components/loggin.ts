@@ -1,8 +1,18 @@
 import {api} from "../services/api.js";
 import { clearPage } from "../utils/clear.js";
 import { createRegisterPage } from "./register.js";
+import { config } from "../config/auth.js";
+
+declare global {
+    interface Window {
+        handleGoogleSignIn: (response: any) => void;
+        google: any;
+    }
+}
 
 export const generateLoginPage = () : void => {
+	console.log("Initializing login page...");
+
 	// Créer le conteneur de la page
 	const body = document.body;
 	body.classList.add('bg-black', 'text-white', 'flex', 'justify-center', 'items-center', 'h-screen', 'overflow-hidden', 'relative');
@@ -12,15 +22,15 @@ export const generateLoginPage = () : void => {
 	loginContainer.classList.add(
 		'bg-[#111]',
 		'p-12',
-		'rounded-3xl',  // Coins arrondis plus marqués
+		'rounded-3xl',
 		'shadow-xl',
-		'w-[350px]',  // Ajustement de la largeur pour plus de fluidité
+		'w-[350px]',
 		'flex',
 		'flex-col',
 		'items-center',
 		'justify-center',
-		'h-[500px]',  // Hauteur ajustée pour plus d'espace
-		'transition-transform', 'transform', 'hover:scale-105' // Animation de zoom au survol
+		'h-[600px]',
+		'transition-transform', 'transform', 'hover:scale-105'
 	);
 
 	// Créer le titre avec effet néon
@@ -102,6 +112,57 @@ export const generateLoginPage = () : void => {
 	form.appendChild(passwordInput);
 	form.appendChild(submitButton);
 
+	// Add divider
+	const divider = document.createElement('div');
+	divider.classList.add('flex', 'items-center', 'my-4', 'w-full');
+
+	const line1 = document.createElement('div');
+	line1.classList.add('flex-1', 'h-px', 'bg-green-500');
+
+	const orText = document.createElement('div');
+	orText.classList.add('mx-4', 'text-green-500', 'text-sm');
+	orText.textContent = 'OR';
+
+	const line2 = document.createElement('div');
+	line2.classList.add('flex-1', 'h-px', 'bg-green-500');
+
+	divider.appendChild(line1);
+	divider.appendChild(orText);
+	divider.appendChild(line2);
+
+	// Add Google Sign-In container
+	const googleContainer = document.createElement('div');
+	googleContainer.classList.add('w-full', 'flex', 'justify-center', 'mt-4');
+
+	// Create a wrapper for Google Sign-In
+	const googleWrapper = document.createElement('div');
+	googleWrapper.classList.add('google-signin-wrapper');
+	googleWrapper.style.width = '100%';
+	googleWrapper.style.display = 'flex';
+	googleWrapper.style.justifyContent = 'center';
+	googleWrapper.style.marginTop = '20px';
+
+	// Add Google Sign-In button div
+	const googleDiv = document.createElement('div');
+	googleDiv.id = 'g_id_onload';
+	googleDiv.setAttribute('data-client_id', config.GOOGLE_CLIENT_ID);
+	googleDiv.setAttribute('data-callback', 'handleGoogleSignIn');
+	googleDiv.setAttribute('data-auto_prompt', 'false');
+
+	const googleSignInDiv = document.createElement('div');
+	googleSignInDiv.classList.add('g_id_signin');
+	googleSignInDiv.setAttribute('data-type', 'standard');
+	googleSignInDiv.setAttribute('data-size', 'large');
+	googleSignInDiv.setAttribute('data-theme', 'outline');
+	googleSignInDiv.setAttribute('data-text', 'sign_in_with');
+	googleSignInDiv.setAttribute('data-shape', 'rectangular');
+	googleSignInDiv.setAttribute('data-logo_alignment', 'left');
+	googleSignInDiv.setAttribute('data-width', '280');
+
+	googleWrapper.appendChild(googleDiv);
+	googleWrapper.appendChild(googleSignInDiv);
+	googleContainer.appendChild(googleWrapper);
+
 	// Créer le lien pour l'inscription
 	const registerButton = document.createElement('button');
 	registerButton.textContent = "Don't have an account? Register here";
@@ -127,23 +188,43 @@ export const generateLoginPage = () : void => {
   const errorField = document.createElement('p');
 	errorField.id = 'error-field';
 	errorField.textContent = '';
-  
-	// Ajouter le formulaire et le lien au conteneur
+
+	// Update the order of elements
 	loginContainer.appendChild(errorField);
 	loginContainer.appendChild(form);
+	loginContainer.appendChild(divider);
+	loginContainer.appendChild(googleContainer);
 	loginContainer.appendChild(registerButton);
 
 	// Ajouter le conteneur au body
 	body.appendChild(loginContainer);
 
-	// Gestion de l'envoi du formulaire
+	// Add form submit handler
 	form.addEventListener('submit', (event) => {
 		event.preventDefault();
 		const username = document.getElementById('username') as HTMLInputElement;
 		const password = document.getElementById('password') as HTMLInputElement;
 		localStorage.setItem('username', username.value);
-
 		api.login(username.value, password.value);
 	});
 
+	// Set up Google Sign-In handler
+	window.handleGoogleSignIn = (response: any) => {
+		console.log("Google Sign-In response received:", response);
+		api.googleLogin(response);
+	};
+
+	// Load Google Sign-In script
+	console.log("Loading Google Sign-In script...");
+	const script = document.createElement('script');
+	script.src = 'https://accounts.google.com/gsi/client';
+	script.async = true;
+	script.defer = true;
+	script.onload = () => {
+		console.log("Google Sign-In script loaded successfully");
+	};
+	script.onerror = (error) => {
+		console.error("Error loading Google Sign-In script:", error);
+	};
+	document.head.appendChild(script);
 }

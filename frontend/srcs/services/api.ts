@@ -2,7 +2,7 @@ import { createHomePage } from "../components/home.js";
 import {generateLoggedPage} from "../components/logged.js";
 import {generateLoginPage} from "../components/loggin.js";
 import {clearPage} from "../utils/clear.js";
-
+import { GoogleAuthResponse, AuthResponse } from "../types/auth.js";
 
 async function getUserByUsername(username: string) {
 	console.log("getUserByUsername called");
@@ -122,7 +122,7 @@ async function disconnect() {
 		if (response.ok) {
 			clearPage();
 			createHomePage();
-			
+
 		} else {
 			alert("Fail to disconnect");
 		}
@@ -132,10 +132,36 @@ async function disconnect() {
 	}
 }
 
+async function googleLogin(response: GoogleAuthResponse) {
+    try {
+        const apiResponse = await fetch('http://localhost:3000/api/auth/google', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ token: response.credential })
+        });
+
+        const result = await apiResponse.json();
+
+        if (apiResponse.ok) {
+            clearPage();
+            generateLoggedPage();
+        } else {
+            alert(result.error || 'Google authentication failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred during Google authentication');
+    }
+}
+
 export const api = {
 	login,
 	register,
 	isAlreadyLog,
 	disconnect,
-	getUserByUsername
+	getUserByUsername,
+	googleLogin
 };

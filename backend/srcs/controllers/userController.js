@@ -319,7 +319,7 @@ async function userLogin(request, reply) {
             console.log("User logged in successfully:", username);
             console.log("Sending response...");
 
-            reply.setCookie('login', username, { 
+            reply.setCookie('login', username, {
                 httpOnly: true,
                 sameSite: 'Strict',
                 secure: true,
@@ -373,7 +373,7 @@ async function createUser(request, reply) {
         console.log(`Creating user: ${username}`);
         await new Promise((resolve, reject) => {
             db.run(
-                'INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
+            'INSERT INTO users (username, password, email) VALUES (?, ?, ?)',
                 [username, hashedPassword, email],
                 (err) => {
                     if (err) reject(err);

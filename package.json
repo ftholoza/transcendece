@@ -24,11 +24,13 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^16.5.0",
     "fastify": "^5.2.1",
+    "google-auth-library": "^9.6.3",
     "pino-pretty": "^13.0.0",
     "sqlite3": "^5.1.7",
     "tap": "^21.1.0"
   },
   "devDependencies": {
+    "@types/google.accounts": "^0.0.14",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.1",
