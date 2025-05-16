@@ -2,10 +2,7 @@ docker-compose up --build
 navigateur
 http://localhost:3000/
 
-id client 1048470452352-hi45kreih9vmlt6cc2gsh66jqddnq7er.apps.googleusercontent.com
-code secret client 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
-
 GOOGLE_CLIENT_ID=1048470452352-hi45kreih9vmlt6cc2gsh66jqddnq7er.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_SECRET=
 COOKIE_SECRET="bf1f-634c-21d8-d768-c695-1710-eb69-ee3a"
 SALT_ROUNDS=10
