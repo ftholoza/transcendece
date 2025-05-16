@@ -10,5 +10,26 @@
 		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 	</head>
 	<body>
+		<script>
+			const socket = new WebSocket("ws://localhost:3000/websocket");
+
+			socket.onopen = () => {
+				console.log("✅ Ouvert");
+				socket.send("Salut serveur !");
+			};
+
+			socket.onmessage = (event) => {
+				console.log("📨 Message reçu :", event.data);
+			};
+
+			socket.onerror = (e) => {
+				console.error("❌ Erreur WebSocket:", e);
+			};
+
+			socket.onclose = () => {
+				console.warn("🔒 Connexion WebSocket fermée");
+			};
+
+		</script>
 	</body>
 </html>

@@ -454,6 +454,11 @@ async function deleteUser(request, reply) {
 }
 
 async function getSession(request, reply) {
+
+    if (!request.cookies.login) {
+        reply.status(401).send({message: "No session"});
+    }
+
     const login = reply.unsignCookie(request.cookies.login);
 
     if (login.valid) {
