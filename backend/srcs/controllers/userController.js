@@ -319,7 +319,7 @@ async function userLogin(request, reply) {
             console.log("User logged in successfully:", username);
             console.log("Sending response...");
 
-            reply.setCookie('login', username, { 
+            reply.setCookie('login', username, {
                 httpOnly: true,
                 sameSite: 'Strict',
                 secure: true,

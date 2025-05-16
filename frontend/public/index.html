@@ -3,49 +3,49 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<!-- <link rel="stylesheet" href="styles.css"> -->
+		 <link rel="stylesheet" href="styles.css">
 		<title>Transcendence</title>
-		<!-- <script type="module" src="js/main.js"></script> -->
-		<!-- <script type="module" src="/js/components/pong.js"></script> -->
-		<!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
+		 <script type="module" src="js/main.js"></script>
+		 <script type="module" src="/js/components/pong.js"></script>
+		 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 	</head>
 	<body>
-		<h1>WebSocket Test</h1>
-		<input id="messageInput" type="text" placeholder="Message..." />
-		<button onclick="sendMessage()">Envoyer</button>
-		<pre id="log"></pre>
+<!--		<h1>WebSocket Test</h1>-->
+<!--		<input id="messageInput" type="text" placeholder="Message..." />-->
+<!--		<button onclick="sendMessage()">Envoyer</button>-->
+<!--		<pre id="log"></pre>-->
 
-		<script>
-			const socket = new WebSocket("ws://localhost:8080/");
+<!--		<script>-->
+<!--			const socket = new WebSocket("ws://localhost:8080/");-->
 
-			socket.onopen = () => {
-			log("✅ Connexion ouverte");
-			};
+<!--			socket.onopen = () => {-->
+<!--				log("✅ Connexion ouverte");-->
+<!--			};-->
 
-			socket.onmessage = (event) => {
-			log("📨 Reçu : " + event.data);
-			};
+<!--			socket.onmessage = (event) => {-->
+<!--				log("📨 Reçu : " + event.data);-->
+<!--			};-->
 
-			socket.onerror = (error) => {
-			log("❌ Erreur : " + error.message || error);
-			};
+<!--			socket.onerror = (error) => {-->
+<!--				log("❌ Erreur : " + error.message || error);-->
+<!--			};-->
 
-			socket.onclose = () => {
-			log("🔌 Connexion fermée");
-			};
+<!--			socket.onclose = () => {-->
+<!--				log("🔌 Connexion fermée");-->
+<!--			};-->
 
-			function sendMessage() {
-			const input = document.getElementById("messageInput");
-			const message = input.value;
-			socket.send(message);
-			log("📤 Envoyé : " + message);
-			input.value = "";
-			}
+<!--			function sendMessage() {-->
+<!--				const input = document.getElementById("messageInput");-->
+<!--				const message = input.value;-->
+<!--				socket.send(message);-->
+<!--				log("📤 Envoyé : " + message);-->
+<!--				input.value = "";-->
+<!--			}-->
 
-			function log(message) {
-			const logElement = document.getElementById("log");
-			logElement.textContent += message + "\n";
-			}
-		</script>
+<!--			function log(message) {-->
+<!--				const logElement = document.getElementById("log");-->
+<!--				logElement.textContent += message + "\n";-->
+<!--			}-->
+<!--		</script>-->
 	</body>
 </html>

@@ -6,6 +6,49 @@ import { generateLoginPage } from "./loggin.js";
 import { generateTournament } from "./tournament.js";
 import { api } from "../services/api.js";
 
+function createFriendsPanel() {
+	// Si le panneau existe déjà, ne rien faire
+	if (document.getElementById('friends-panel')) return;
+
+	const panel = document.createElement('div');
+	panel.id = 'friends-panel';
+	panel.classList.add(
+		'fixed', 'top-0', 'right-0', 'h-full', 'w-80',
+		'bg-black', 'bg-opacity-90', 'text-white',
+		'shadow-lg', 'z-50', 'p-4', 'flex', 'flex-col'
+	);
+
+	const closeButton = document.createElement('button');
+	closeButton.textContent = '✕';
+	closeButton.classList.add('self-end', 'text-red-500', 'text-xl', 'mb-4');
+	closeButton.addEventListener('click', () => {
+		panel.remove();
+	});
+
+	const title = document.createElement('h2');
+	title.textContent = 'Your Friends';
+	title.classList.add('text-green-400', 'text-xl', 'mb-4');
+
+	const friendsList = document.createElement('ul');
+	friendsList.classList.add('space-y-2');
+
+	// Exemple de liste fictive – tu peux remplacer par un appel à `api.getFriends()` si tu as une fonction
+	const friends = ['Alice', 'Bob', 'Charlie'];
+	friends.forEach(friend => {
+		const li = document.createElement('li');
+		li.textContent = friend;
+		li.classList.add('bg-green-700', 'rounded', 'px-4', 'py-2');
+		friendsList.appendChild(li);
+	});
+
+	panel.appendChild(closeButton);
+	panel.appendChild(title);
+	panel.appendChild(friendsList);
+
+	document.body.appendChild(panel);
+}
+
+
 export function generateLoggedPage(): void {
 	document.body.innerHTML = ''; // clear everything
 	document.body.className = ''; // reset all classes
@@ -26,7 +69,7 @@ export function generateLoggedPage(): void {
 	navbar.classList.add('absolute', 'top-10', 'left-1/2', 'transform', '-translate-x-1/2', 'flex', 'space-x-8', 'bg-black', 'bg-opacity-60', 'p-4', 'rounded-lg', 'shadow-lg');
 	body.appendChild(navbar);
 
-	['Home', 'Game', 'Profile', 'Settings', 'Disconnect'].forEach((text) => {
+	['Home', 'Friends', 'Profile', 'Settings', 'Disconnect'].forEach((text) => {
 		const link = document.createElement('a');
 		link.classList.add('text-lg', 'text-green-500', 'hover:text-red-500');
 		link.textContent = text;
@@ -34,6 +77,10 @@ export function generateLoggedPage(): void {
 		switch (text) {
 			case 'Disconnect':
 				api.disconnect();
+				break;
+
+			case 'Friends':
+				createFriendsPanel();
 				break;
 		}
 	});
@@ -49,7 +96,7 @@ export function generateLoggedPage(): void {
 	container.style.height = '100vh';
 	container.style.textAlign = 'center';
 	document.body.appendChild(container);
-  
+
 	// Title
 	const title = document.createElement('h1');
 	title.textContent = 'TRANSCENDENCE';
@@ -59,7 +106,7 @@ export function generateLoggedPage(): void {
 	title.style.textShadow = '0 0 10px #00ff00';
 	title.style.marginBottom = '20px';
 	container.appendChild(title);
-  
+
 	// Game menu buttons
 	const gameMenu = document.createElement('div');
 	gameMenu.style.display = 'flex';
@@ -67,7 +114,7 @@ export function generateLoggedPage(): void {
 	gameMenu.style.marginTop = '30px';
 	gameMenu.style.gap = '15px';
 	container.appendChild(gameMenu);
-  
+
 	['Start Game', 'Tournament', 'Profile', 'Settings'].forEach((text) => {
 	  const button = document.createElement('button');
 	  button.classList.add(
@@ -88,7 +135,7 @@ export function generateLoggedPage(): void {
 	  );
 	  button.textContent = text;
 	  gameMenu.appendChild(button);
-  
+
 	  if (text === 'Start Game') {
 		button.addEventListener('click', () => {
 		  console.log('Start Game clicked');

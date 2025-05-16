@@ -50,8 +50,6 @@ fastify.setErrorHandler(function (error, request, reply) {
   reply.status(500).send({ error: "Erreur interne serveur" });
 });
 
-
-
 fastify.get("/", async (request, reply) => {
     try {
         const filePath = path.join(__dirname, "../../frontend/public/index.html");
@@ -62,19 +60,22 @@ fastify.get("/", async (request, reply) => {
     }
 })
 
-const wss = new ws.WebSocketServer({ port: 8080, host: "0.0.0.0" });
+const { WebSocketServer } = require('ws');
+
+const wss = new WebSocketServer({ port: 8080, host: "0.0.0.0" });
+
+wss.on('listening', () => {
+	logger.info('WebSocket server is listening on ws://localhost:8080');
+});
 
 wss.on('connection', function connection(ws) {
-    
     console.log('Client connected');
-  
+
     ws.on('error', console.error);
 
-  ws.on('message', function message(data) {
-    console.log('received: %s', data);
-  });
-
-  ws.send('something');
+	ws.on('message', function message(data) {
+		console.log('received: %s', data);
+	});
 });
 
 
