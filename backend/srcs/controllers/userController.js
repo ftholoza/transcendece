@@ -318,6 +318,15 @@ async function userLogin(request, reply) {
         if (passwordMatch) {
             console.log("User logged in successfully:", username);
             console.log("Sending response...");
+
+            reply.setCookie('login', username, { 
+                httpOnly: true,
+                sameSite: 'Strict',
+                secure: true,
+                path: '/',
+                signed: true
+            });
+
             return reply.status(200).send({ message: "User connected successfully", username });
         } else {
             console.log("Wrong password for user:", username);
@@ -444,6 +453,29 @@ async function deleteUser(request, reply) {
     }
 }
 
+async function getSession(request, reply) {
+    const login = reply.unsignCookie(request.cookies.login);
+
+    if (login.valid) {
+        reply.send({logged: true, username: login.value});
+    } else
+        reply.status(401).send({message: 'No session'});
+}
+
+async function userLogout(request, reply) {
+
+    try {
+        reply.clearCookie('login', {
+            path: '/'
+        });
+
+        reply.send({ message : 'Successfuly disconnect'});
+
+    } catch (err) {
+        console.log(err);
+        reply.status(500).send("Something goes wrong...");
+    }
+}
 
 module.exports = {
     updateEmail,
@@ -456,5 +488,7 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    userLogin
+    userLogin,
+    getSession,
+    userLogout
 };

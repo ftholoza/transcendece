@@ -3,6 +3,8 @@ import { showStartMenu } from "./startMenu.js";
 import { createProfilePage } from "./profilePage.js";
 import { clearPage } from "../utils/clear.js";
 import { generateLoginPage } from "./loggin.js";
+import { generateTournament } from "./tournament.js";
+import { api } from "../services/api.js";
 
 export function generateLoggedPage(): void {
 	document.body.innerHTML = ''; // clear everything
@@ -31,9 +33,7 @@ export function generateLoggedPage(): void {
 			link.addEventListener('click', () => {
 		switch (text) {
 			case 'Disconnect':
-				localStorage.clear();
-				clearPage();
-				generateLoginPage();
+				api.disconnect();
 				break;
 		}
 	});
@@ -68,7 +68,7 @@ export function generateLoggedPage(): void {
 	gameMenu.style.gap = '15px';
 	container.appendChild(gameMenu);
   
-	['Start Game', 'Profile', 'Settings'].forEach((text) => {
+	['Start Game', 'Tournament', 'Profile', 'Settings'].forEach((text) => {
 	  const button = document.createElement('button');
 	  button.classList.add(
 		'bg-green-500',
@@ -106,6 +106,13 @@ export function generateLoggedPage(): void {
 		  // Add action
 		});
 	  }
+	  if (text === 'Tournament') {
+		button.addEventListener('click', () => {
+		  console.log('Settings clicked');
+		  clearPage();
+		  generateTournament();
+		});
+		}
 	});
 
 	// Footer

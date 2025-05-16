@@ -81,6 +81,6 @@ export function showStartMenu(): void {
         alert('Please enter a valid number of points.');
         return;
       }
-      start_pong_game(maxPoints); // Make sure your game function accepts this param
+      start_pong_game(maxPoints, "player1", "player2");
     });
   }
