@@ -4,7 +4,8 @@ const fastifyCors = require("@fastify/cors");
 const fastifyStatic = require("@fastify/static");
 const fastifyCookie = require("@fastify/cookie");
 const fastifyMultipart = require('@fastify/multipart');
-const websocket = require('@fastify/websocket');
+
+const ws = require('ws');
 
 fastify.register(fastifyMultipart);
 const logger = require("./utils/logger");
@@ -49,53 +50,7 @@ fastify.setErrorHandler(function (error, request, reply) {
   reply.status(500).send({ error: "Erreur interne serveur" });
 });
 
-// fastify.register(websocket);
-fastify.register(require('@fastify/websocket'));
 
-const WebSocket = require('ws');  // en haut du fichier
-
-
-fastify.get("/websocket", { websocket: true}, (connection, req) => {
-    const socket = connection.socket;
-
-    // console.log("Type de socket:", typeof socket);
-    // console.log("Méthodes de socket:", Object.getOwnPropertyNames(Object.getPrototypeOf(socket)));
-
-    console.log('Est-ce un WebSocket ? ', socket.constructor.name);
-    console.log(Object.getPrototypeOf(socket));
-    console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(socket)));
-
-
-    console.log("✅ Client connecté (socket)");
-
-    socket.on('message', (message) => {
-        console.log('Message reçu:', message.toString());
-        socket.send('Hello client');
-    });
-
-    socket.on('error', (err) => {
-        console.log("Error socket: ", err);
-    });
-
-    socket.send('Bienvenue');
-
-    // stream.write("hello client\n");
-    // console.log('message sent');
-
-    // stream.on("data", (chunk) => {
-    //     const message = chunk.toString('utf-8');
-    //     console.log("📨 Message du client :", message);
-    //     stream.write("🪞 Echo: " + message);
-    // });
-
-    // stream.on("error", (err) => {
-    //     console.error("❌ Erreur sur le stream :", err);
-    // });
-
-    // stream.on("close", () => {
-    //     console.log("❌ Connexion fermée");
-    // });
-});
 
 fastify.get("/", async (request, reply) => {
     try {
@@ -106,6 +61,23 @@ fastify.get("/", async (request, reply) => {
         reply.code(404).send("Not found");
     }
 })
+
+const wss = new ws.WebSocketServer({ port: 8080, host: "0.0.0.0" });
+
+wss.on('connection', function connection(ws) {
+    
+    console.log('Client connected');
+  
+    ws.on('error', console.error);
+
+  ws.on('message', function message(data) {
+    console.log('received: %s', data);
+  });
+
+  ws.send('something');
+});
+
+
 
 const start = async () => {
     try {
