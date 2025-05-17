@@ -1,7 +1,7 @@
 import {api} from "../services/api.js";
 import { clearPage } from "../utils/clear.js";
 import { createRegisterPage } from "./register.js";
-import { config } from "../config/auth.js";
+import { config, initializeConfig } from "../config/auth.js";
 
 declare global {
     interface Window {
@@ -10,8 +10,11 @@ declare global {
     }
 }
 
-export const generateLoginPage = () : void => {
+export const generateLoginPage = async () : Promise<void> => {
 	console.log("Initializing login page...");
+
+	// Initialize config first
+	await initializeConfig();
 
 	// Créer le conteneur de la page
 	const body = document.body;
@@ -215,7 +218,7 @@ export const generateLoginPage = () : void => {
 	};
 
 	// Load Google Sign-In script
-	console.log("Loading Google Sign-In script...");
+	console.log("Loading Google Sign-In script with Client ID:", config.GOOGLE_CLIENT_ID);
 	const script = document.createElement('script');
 	script.src = 'https://accounts.google.com/gsi/client';
 	script.async = true;

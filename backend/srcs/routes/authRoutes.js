@@ -1,6 +1,13 @@
 const authController = require('../controllers/authController');
 
 async function authRoutes(fastify, options) {
+    // Route to get Google Client ID
+    fastify.get("/auth/config", async (request, reply) => {
+        return {
+            googleClientId: process.env.GOOGLE_CLIENT_ID
+        };
+    });
+
     // Route for handling Google Sign-In token verification
     fastify.post("/auth/google", authController.googleLogin);
 

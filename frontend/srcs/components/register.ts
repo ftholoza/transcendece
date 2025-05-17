@@ -2,7 +2,7 @@ import {api} from "../services/api.js";
 import { clearPage } from "../utils/clear.js";
 import { generateLoginPage } from "./loggin.js";
 
-export function createRegisterPage() {
+export const createRegisterPage = () => {
 	console.log("---create register called---")
 	// Créer le body
 	const body = document.body;
@@ -90,10 +90,10 @@ export function createRegisterPage() {
 		api.register(username, email, password);
 	});
 
-	footerLink.addEventListener('click', (e) => {
+	footerLink.addEventListener('click', async (e) => {
   	e.preventDefault();
 	clearPage();
-  	generateLoginPage();
+  	await generateLoginPage();
 });
 
 }
