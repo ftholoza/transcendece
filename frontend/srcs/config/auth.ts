@@ -1,3 +1,3 @@
 export const config = {
-    GOOGLE_CLIENT_ID: '1048470452352-hi45kreih9vmlt6cc2gsh66jqddnq7er.apps.googleusercontent.com'
+    GOOGLE_CLIENT_ID: '1048470452352-p2u051ejco2506ujaq9d1bs33u1rk0fl.apps.googleusercontent.com'
 };
