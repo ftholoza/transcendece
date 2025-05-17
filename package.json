@@ -8,7 +8,7 @@
     "build:ts": "tsc -p tsconfig.json",
     "build:css": "postcss frontend/srcs/styles.css -o frontend/public/styles.css",
     "build": "npm run build:ts && npm run build:css",
-    "clear": "rm -rf package-lock.json node_modules frontend/public/js frontend/public/styles.css",
+	"clear": "rm -rf package-lock.json node_modules frontend/public/js frontend/public/styles.css",
     "start": "node --env-file=.env backend/srcs/server.js"
   },
   "keywords": [],

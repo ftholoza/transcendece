@@ -20,11 +20,23 @@ async function googleLogin(request, reply) {
         });
 
         if (!existingUser) {
-            // Create new user
+            // Create new user with avatar URL
             await new Promise((resolve, reject) => {
                 db.run(
                     'INSERT INTO users (username, email, password, avatar) VALUES (?, ?, ?, ?)',
-                    [name, email, 'google-auth', picture],
+                    [name, email, 'google-auth', picture], // Store the Google profile picture URL
+                    (err) => {
+                        if (err) reject(err);
+                        else resolve();
+                    }
+                );
+            });
+        } else {
+            // Update existing user's avatar if they logged in with Google
+            await new Promise((resolve, reject) => {
+                db.run(
+                    'UPDATE users SET avatar = ? WHERE email = ?',
+                    [picture, email],
                     (err) => {
                         if (err) reject(err);
                         else resolve();
@@ -44,7 +56,8 @@ async function googleLogin(request, reply) {
 
         return reply.status(200).send({
             message: "Successfully authenticated with Google",
-            username: name
+            username: name,
+            avatar: picture
         });
     } catch (error) {
         console.error('Google authentication error:', error);

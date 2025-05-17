@@ -19,7 +19,7 @@ fastify.register(fastifyCookie, {
 
 fastify.register(fastifyCors, {
     origin: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
 });
